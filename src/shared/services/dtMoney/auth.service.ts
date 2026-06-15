@@ -3,25 +3,32 @@ import { dtMoneyApi } from "@/shared/api/dtmoney";
 import { FormLoginParams } from "@/screens/Login/LoginForm";
 import { FormRegisterParams } from "@/screens/Register/RegisterForm";
 
-import { IAuthenticateResponse } from "@/shared/interfaces/http/authenticate-response";
+import { IAuthenticateResponse } from "@/shared/interfaces/authenticate-response.interface";
 
 export const authenticate = async (
 	userData: FormLoginParams,
 ): Promise<IAuthenticateResponse> => {
-	const { data } = await dtMoneyApi.post<IAuthenticateResponse>(
+	const { data } = await dtMoneyApi.post<{ data: IAuthenticateResponse }>(
 		"/auth/login",
-		userData,
+		{
+			emailOrUsername: userData.email,
+			password: userData.password,
+		},
 	);
-	return data;
+	return data.data;
 };
 
 export const registerUser = async (
 	userData: FormRegisterParams,
 ): Promise<IAuthenticateResponse> => {
-	const { data } = await dtMoneyApi.post<IAuthenticateResponse>(
+	const { data } = await dtMoneyApi.post<{ data: IAuthenticateResponse }>(
 		"/auth/register",
-		userData,
+		{
+			email: userData.email,
+			username: userData.name,
+			password: userData.password,
+		},
 	);
 
-	return data;
+	return data.data;
 };

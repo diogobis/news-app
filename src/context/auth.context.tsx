@@ -11,7 +11,7 @@ import * as AuthServices from "@/shared/services/dtMoney/auth.service";
 import { IUser } from "@/shared/interfaces/user.interface";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { IAuthenticateResponse } from "@/shared/interfaces/http/authenticate-response";
+import { IAuthenticateResponse } from "@/shared/interfaces/authenticate-response.interface";
 
 type AuthContextType = {
 	user: IUser | null;
@@ -62,12 +62,21 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		const userData = await AsyncStorage.getItem("dt-money-user");
 
 		if (userData) {
-			const { user, token } = JSON.parse(
-				userData,
-			) as IAuthenticateResponse;
+			try {
+				const parsed = JSON.parse(userData) as IAuthenticateResponse;
+				const payload = JSON.parse(atob(parsed.token.split(".")[1]));
 
-			setUser(user);
-			setToken(token);
+				if (payload.exp && payload.exp * 1000 < Date.now()) {
+					await AsyncStorage.clear();
+					return null;
+				}
+
+				setUser(parsed.user);
+				setToken(parsed.token);
+			} catch {
+				await AsyncStorage.clear();
+				return null;
+			}
 		}
 
 		return userData;

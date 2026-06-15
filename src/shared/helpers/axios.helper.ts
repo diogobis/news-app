@@ -1,4 +1,4 @@
-import { IAuthenticateResponse } from "@/shared/interfaces/http/authenticate-response";
+import { IAuthenticateResponse } from "@/shared/interfaces/authenticate-response.interface";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosInstance } from "axios";
 

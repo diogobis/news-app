@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+import RenderHtml from 'react-native-render-html'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
@@ -36,6 +37,7 @@ export const ArticleDetail = () => {
 
 	const [article, setArticle] = useState<ArticleDetailType | null>(null)
 	const [loading, setLoading] = useState(true)
+	const { width } = useWindowDimensions()
 
 	const fetchDetails = useCallback(async () => {
 		try {
@@ -144,7 +146,11 @@ export const ArticleDetail = () => {
 				})()}
 
 				{article.body ? (
-					<Text className="text-gray-400 text-base leading-6 mb-8">{article.body}</Text>
+					<RenderHtml
+						contentWidth={width}
+						source={{ html: `<body style="color:#9CA3AF;font-size:16px;line-height:1.6">${article.body}</body>` }}
+						baseStyle={{ color: '#9CA3AF', fontSize: 16, lineHeight: 26 }}
+					/>
 				) : (
 					<Text className="text-gray-600 text-base italic mb-8">
 						Conteúdo não disponível

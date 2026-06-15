@@ -34,6 +34,7 @@ export const CategoryChips = () => {
 			horizontal
 			showsHorizontalScrollIndicator={false}
 			className="py-4 pl-6"
+			style={{ flexGrow: 0, height: 56 }}
 		>
 			<TouchableOpacity
 				className={clsx(

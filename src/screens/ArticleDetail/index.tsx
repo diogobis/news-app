@@ -14,6 +14,7 @@ import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
 import { useSnackbarContext } from '@/context/snackbar.context'
 import { colors } from '@/shared/colors'
 import { categoryLabel, categoryColor } from '@/shared/utils/categoryLabels'
+import { Comments } from './Comments'
 
 type DetailRouteParams = {
 	ArticleDetail: { uuid: string }
@@ -149,6 +150,8 @@ export const ArticleDetail = () => {
 						Conteúdo não disponível
 					</Text>
 				)}
+
+				<Comments articleUuid={uuid} />
 				</ScrollView>
 			</View>
 

@@ -1,0 +1,115 @@
+import { useForm } from "react-hook-form";
+import { AppInput } from "@/components/AppInput";
+import { AppButton } from "@/components/AppButton";
+import { ActivityIndicator, Text, View } from "react-native";
+
+import { PublicStackParamsList } from "@/routes/PublicRoutes";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+import { yupResolver } from "@hookform/resolvers/yup";
+import { schema } from "./schema";
+
+import { useAuthContext } from "@/context/auth.context";
+
+import { useErrorHandler } from "@/shared/hooks/useErrorHandler";
+import { colors } from "@/shared/colors";
+
+export interface FormRegisterParams {
+	email: string;
+	name: string;
+	password: string;
+	confirmPassword: string;
+}
+
+export const RegisterForm = () => {
+	const {
+		control,
+		handleSubmit,
+		formState: { isSubmitting },
+	} = useForm<FormRegisterParams>({
+		defaultValues: {
+			name: "",
+			email: "",
+			password: "",
+			confirmPassword: "",
+		},
+		resolver: yupResolver(schema),
+	});
+	const { handleRegister } = useAuthContext();
+	const { errorHandler } = useErrorHandler();
+
+	const navigation =
+		useNavigation<StackNavigationProp<PublicStackParamsList>>();
+
+	const onSubmit = async (userData: FormRegisterParams) => {
+		try {
+			await handleRegister(userData);
+		} catch (error) {
+			errorHandler(error, "Falha ao cadastrar usuário");
+		}
+	};
+
+	return (
+		<>
+			<AppInput
+				control={control}
+				name="name"
+				leftIconName="person"
+				label="Nome"
+				placeholder="Seu nome"
+			/>
+			<AppInput
+				control={control}
+				name="email"
+				leftIconName="mail-outline"
+				label="Email"
+				placeholder="mail@example.br"
+			/>
+			<AppInput
+				control={control}
+				name="password"
+				leftIconName="lock-outline"
+				label="Senha"
+				placeholder="Sua senha"
+				secureTextEntry
+			/>
+			<AppInput
+				control={control}
+				name="confirmPassword"
+				leftIconName="lock-outline"
+				label="Senha"
+				placeholder="Confirme sua senha"
+				secureTextEntry
+			/>
+
+			<View className="flex-1 justify-between mt-8 mb-8 min-h-[250px]">
+				<View className="mt-6">
+					<AppButton
+						iconName="arrow-forward"
+						onPress={handleSubmit(onSubmit)}
+					>
+						{isSubmitting ? (
+							<ActivityIndicator color={colors.white} />
+						) : (
+							"Cadastrar"
+						)}
+					</AppButton>
+				</View>
+
+				<View>
+					<Text className="mb-6 text-gray-400 text-base">
+						Já possui uma conta?
+					</Text>
+
+					<AppButton
+						mode="outline"
+						onPress={() => navigation.navigate("Login")}
+					>
+						Acessar
+					</AppButton>
+				</View>
+			</View>
+		</>
+	);
+};

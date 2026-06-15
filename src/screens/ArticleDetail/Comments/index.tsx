@@ -40,7 +40,7 @@ export const Comments = ({ articleUuid }: CommentsProps) => {
 		} finally {
 			setLoading(false)
 		}
-	}, [articleUuid, errorHandler])
+	}, [articleUuid])
 
 	useEffect(() => {
 		fetchComments()

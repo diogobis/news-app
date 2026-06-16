@@ -3,6 +3,7 @@ import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, Platform, RefreshControl, TextInput, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useNavigation } from '@react-navigation/native'
 import { MaterialIcons } from '@expo/vector-icons'
 import { AppHeader } from '@/components/AppHeader'
 import { CategoryChips } from './CategoryChips'
@@ -34,10 +35,10 @@ export const NewsFeed = () => {
 
 	const fmt = (d: Date | undefined) => d ? d.toISOString().slice(0, 10) : undefined
 
-	const handleFetchNews = async (search?: string, published_from?: string, published_to?: string) => {
+	const handleFetchNews = async (search?: string, publishedFrom?: string, publishedTo?: string) => {
 		try {
 			handleLoadings({ key: 'initial', value: true })
-			await fetchNews({ search, published_from, published_to })
+			await fetchNews({ search, publishedFrom, publishedTo })
 		} catch (error) {
 			errorHandler(error, 'Falha ao buscar notícias')
 		} finally {
@@ -50,8 +51,8 @@ export const NewsFeed = () => {
 			handleLoadings({ key: 'refresh', value: true })
 			await refreshNews({
 				search: searchRef.current || undefined,
-				published_from: fmt(dateFromRef.current),
-				published_to: fmt(dateToRef.current),
+				publishedFrom: fmt(dateFromRef.current),
+				publishedTo: fmt(dateToRef.current),
 			})
 		} catch (error) {
 			errorHandler(error, 'Falha ao atualizar notícias')
@@ -66,8 +67,8 @@ export const NewsFeed = () => {
 			handleLoadings({ key: 'loadMore', value: true })
 			await loadMoreNews({
 				search: searchRef.current || undefined,
-				published_from: fmt(dateFromRef.current),
-				published_to: fmt(dateToRef.current),
+				publishedFrom: fmt(dateFromRef.current),
+				publishedTo: fmt(dateToRef.current),
 			})
 		} catch (error) {
 			errorHandler(error, 'Falha ao carregar mais notícias')
@@ -107,11 +108,27 @@ export const NewsFeed = () => {
 		scheduleDateFetch(dateFrom, d)
 	}
 
+	const navigation = useNavigation()
 	const today = useMemo(() => new Date(), [])
+	const hasFocused = useRef(false)
 
 	useEffect(() => {
 		handleFetchNews()
 	}, [])
+
+	useEffect(() => {
+		const unsubscribe = navigation.addListener('focus', () => {
+			if (hasFocused.current) {
+				refreshNews({
+					search: searchRef.current || undefined,
+					publishedFrom: fmt(dateFromRef.current),
+					publishedTo: fmt(dateToRef.current),
+				}).catch(() => {})
+			}
+			hasFocused.current = true
+		})
+		return unsubscribe
+	}, [navigation, refreshNews])
 
 	useEffect(() => {
 		return () => {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
@@ -62,6 +62,14 @@ export const Favorites = () => {
 
 	const today = useMemo(() => new Date(), [])
 
+	const handleRemoveFavorite = useCallback(async (articleUuid: string) => {
+		try {
+			await handleToggleFavorite(articleUuid)
+		} catch (error) {
+			errorHandler(error, 'Falha ao remover dos favoritos')
+		}
+	}, [handleToggleFavorite])
+
 	return (
 		<SafeAreaView className="flex-1 bg-background-primary">
 			<View className="flex-row items-center p-4">
@@ -111,7 +119,7 @@ export const Favorites = () => {
 								<Text className="text-gray-500 text-sm mb-3">{item.publisher}</Text>
 								<TouchableOpacity
 									className="flex-row items-center"
-									onPress={() => handleToggleFavorite(item.articleUuid)}
+									onPress={() => handleRemoveFavorite(item.articleUuid)}
 								>
 									<MaterialIcons name="favorite" size={20} color={colors['accent-red']} />
 									<Text className="text-accent-red text-sm ml-2">Remover dos favoritos</Text>

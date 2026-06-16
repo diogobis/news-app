@@ -196,7 +196,7 @@ const CommentCard = ({ comment, currentUserId, onReply, onDelete }: CommentCardP
 			<View className="flex-row items-center">
 				<TouchableOpacity
 					className="flex-row items-center mr-4"
-					onPress={() => onReply(comment.id, comment.username)}
+					onPress={() => onReply(comment.parentId ?? comment.id, comment.username)}
 				>
 					<MaterialIcons name="reply" size={16} color={colors.gray[500]} />
 					<Text className="text-gray-500 text-sm ml-1">Responder</Text>

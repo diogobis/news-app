@@ -1,7 +1,7 @@
 export const CATEGORIES: Record<string, { label: string; color: string }> = {
-	politics:  { label: 'Política',   color: '#00875F' },
+	politics:  { label: 'Política',   color: '#4F6EF7' },
 	world:     { label: 'Mundo',      color: '#5A86F7' },
-	business:  { label: 'Negócios',   color: '#00B37E' },
+	business:  { label: 'Negócios',   color: '#14B8A6' },
 	technology:{ label: 'Tecnologia', color: '#F75A68' },
 	science:   { label: 'Ciência',    color: '#9B59B6' },
 	gaming:    { label: 'Games',      color: '#F39C12' },

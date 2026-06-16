@@ -10,7 +10,7 @@ export const schema = yup.object().shape({
 
 	password: yup
 		.string()
-		.min(6, "A senha deve ter no mínimo 6 caracteres")
+		.		min(8, "A senha deve ter no mínimo 8 caracteres")
 		.required("A senha é obrigatória"),
 
 	confirmPassword: yup

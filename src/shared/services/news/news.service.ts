@@ -7,8 +7,8 @@ interface GetNewsParams {
 	limit?: number
 	category?: string
 	search?: string
-	published_from?: string
-	published_to?: string
+	publishedFrom?: string
+	publishedTo?: string
 }
 
 interface GetNewsResponse {

@@ -20,9 +20,10 @@ dtMoneyApi.interceptors.response.use(
 	(response) => response,
 	(error) => {
 		if (error.response && error.response.data) {
-			return Promise.reject(new AppError(error.response.data.message));
+			const msg = error.response.data.error?.message ?? error.response.data.message
+			return Promise.reject(new AppError(msg || 'Falha na requisição'))
 		}
 
-		return Promise.reject(new AppError("Falha na requisição"));
+		return Promise.reject(new AppError('Falha na requisição'))
 	},
 );

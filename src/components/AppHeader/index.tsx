@@ -1,7 +1,7 @@
 import { useAuthContext } from '@/context/auth.context'
 import { colors } from '@/shared/colors'
 import { MaterialIcons } from '@expo/vector-icons'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 
@@ -23,10 +23,7 @@ export const AppHeader = () => {
 	return (
 		<View className="w-full flex-row p-8 justify-between items-center bg-background-primary">
 			<View>
-				<Image
-					source={require('@/assets/logo.png')}
-					className="w-[130px] h-[30px]"
-				/>
+				<MaterialIcons name="newspaper" color={colors.white} size={28} />
 			</View>
 
 			{user ? (

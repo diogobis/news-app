@@ -9,12 +9,11 @@ interface CreateCommentPayload {
 
 export const getComments = async (articleUuid: string): Promise<CommentItem[]> => {
 	const { data } = await dtMoneyApi.get<{ data: CommentItem[] }>(`/comments/${articleUuid}`)
-	return data.data
+	return data.data.map((c) => ({ ...c, replies: c.replies ?? [] }))
 }
 
-export const createComment = async (payload: CreateCommentPayload): Promise<CommentItem> => {
-	const { data } = await dtMoneyApi.post<{ data: CommentItem }>('/comments', payload)
-	return data.data
+export const createComment = async (payload: CreateCommentPayload): Promise<void> => {
+	await dtMoneyApi.post('/comments', payload)
 }
 
 export const deleteComment = async (id: number): Promise<void> => {

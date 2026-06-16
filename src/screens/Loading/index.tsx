@@ -1,6 +1,7 @@
 import { colors } from "@/shared/colors";
-import { ActivityIndicator, Image } from "react-native";
+import { ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialIcons } from "@expo/vector-icons";
 
 import { FC, useEffect } from "react";
 import { useAuthContext } from "@/context/auth.context";
@@ -30,10 +31,7 @@ export const Loading: FC<LoadingParams> = ({ setLoading }) => {
 
 	return (
 		<SafeAreaView className="flex-1 bg-background-primary items-center justify-center">
-			<Image
-				source={require("@/assets/logo.png")}
-				className="h-[48px] w-[255px]"
-			/>
+			<MaterialIcons name="newspaper" color={colors.white} size={64} />
 
 			<ActivityIndicator color={colors.white} className="mt-20" />
 		</SafeAreaView>

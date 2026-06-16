@@ -1,5 +1,7 @@
 import { useKeyboardVisible } from "@/shared/hooks/useKeyboardVisible";
-import { Image, View } from "react-native";
+import { View } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { colors } from "@/shared/colors";
 
 export const AuthHeader = () => {
 	const keyboardIsVisible = useKeyboardVisible();
@@ -10,10 +12,7 @@ export const AuthHeader = () => {
 
 	return (
 		<View className="items-center justify-center h-40">
-			<Image
-				source={require("@/assets/logo.png")}
-				className="h-[48px] w-[255px]"
-			/>
+			<MaterialIcons name="newspaper" color={colors.white} size={64} />
 		</View>
 	);
 };

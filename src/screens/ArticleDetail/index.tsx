@@ -59,6 +59,23 @@ export const ArticleDetail = () => {
 	const isFavorited = favorites.some((f) => f.articleUuid === uuid)
 	const isSaved = readLater.some((r) => r.articleUuid === uuid)
 
+	const handleFavoritePress = async () => {
+		try {
+			await handleToggleFavorite(uuid)
+		} catch (error) {
+			errorHandler(error, 'Falha ao favoritar')
+		}
+	}
+
+	const handleSaveLaterPress = async () => {
+		if (isSaved) return
+		try {
+			await handleSaveReadLater(uuid)
+		} catch (error) {
+			errorHandler(error, 'Falha ao salvar para ler depois')
+		}
+	}
+
 	useEffect(() => {
 		fetchDetails()
 	}, [fetchDetails])
@@ -165,7 +182,7 @@ export const ArticleDetail = () => {
 				<View className="flex-row justify-around p-4 bg-background-secondary">
 					<TouchableOpacity
 						className="items-center"
-						onPress={() => handleToggleFavorite(uuid)}
+						onPress={handleFavoritePress}
 					>
 						<MaterialIcons
 							name={isFavorited ? 'favorite' : 'favorite-outline'}
@@ -179,10 +196,7 @@ export const ArticleDetail = () => {
 
 					<TouchableOpacity
 						className="items-center"
-						onPress={() => {
-							if (isSaved) return
-							handleSaveReadLater(uuid)
-						}}
+						onPress={handleSaveLaterPress}
 					>
 						<MaterialIcons
 							name={isSaved ? 'bookmark' : 'bookmark-outline'}

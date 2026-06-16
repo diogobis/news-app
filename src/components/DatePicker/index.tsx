@@ -43,6 +43,11 @@ export const DatePicker = ({ value, onChange, placeholder, minDate, maxDate }: D
             minHeight: 40,
           }}
         />
+        {value && (
+          <TouchableOpacity onPress={() => onChange(undefined)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <MaterialIcons name="close" size={16} color={colors.gray[500]} />
+          </TouchableOpacity>
+        )}
       </View>
     )
   }
@@ -60,6 +65,14 @@ export const DatePicker = ({ value, onChange, placeholder, minDate, maxDate }: D
         <Text className={`flex-1 text-sm ml-2 ${value ? 'text-white' : 'text-gray-600'}`}>
           {formatted || placeholder}
         </Text>
+        {value && (
+          <TouchableOpacity
+            onPress={() => onChange(undefined)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <MaterialIcons name="close" size={16} color={colors.gray[500]} />
+          </TouchableOpacity>
+        )}
       </TouchableOpacity>
       {show && (
         <DateTimePicker

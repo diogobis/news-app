@@ -2,6 +2,13 @@ import { IAuthenticateResponse } from "@/shared/interfaces/authenticate-response
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosInstance } from "axios";
 
+type LogoutListener = () => void
+let logoutListener: LogoutListener | null = null
+
+export const setLogoutListener = (listener: LogoutListener | null) => {
+	logoutListener = listener
+}
+
 export const addTokenToRequest = (axiosInstance: AxiosInstance) => {
 	axiosInstance.interceptors.request.use(async (config) => {
 		const userData = await AsyncStorage.getItem("dt-money-user");
@@ -16,4 +23,15 @@ export const addTokenToRequest = (axiosInstance: AxiosInstance) => {
 
 		return config;
 	});
+
+	axiosInstance.interceptors.response.use(
+		(response) => response,
+		async (error) => {
+			if (error.response?.status === 401) {
+				await AsyncStorage.clear()
+				logoutListener?.()
+			}
+			throw error
+		},
+	)
 };

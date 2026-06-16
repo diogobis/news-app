@@ -5,17 +5,8 @@ import { Text, TouchableOpacity, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { DrawerNavigationProp } from '@react-navigation/drawer'
-
-type PublicStackParamsList = {
-	Login: undefined
-}
-
-type DrawerParamsList = {
-	Feed: undefined
-	Favorites: undefined
-	ReadLater: undefined
-	MutedKeywords: undefined
-}
+import { DrawerParamsList } from '@/shared/interfaces/navigation.types'
+import { PublicStackParamsList } from '@/shared/interfaces/navigation.types'
 
 export const AppHeader = () => {
 	const { user, handleLogout } = useAuthContext()

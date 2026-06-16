@@ -4,7 +4,9 @@ import {
 	FC,
 	PropsWithChildren,
 	createContext,
+	useCallback,
 	useContext,
+	useEffect,
 	useState,
 } from "react";
 import * as AuthServices from "@/shared/services/dtMoney/auth.service";
@@ -12,6 +14,7 @@ import { IUser } from "@/shared/interfaces/user.interface";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { IAuthenticateResponse } from "@/shared/interfaces/authenticate-response.interface";
+import { setLogoutListener } from "@/shared/helpers/axios.helper";
 
 type AuthContextType = {
 	user: IUser | null;
@@ -28,7 +31,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	const [user, setUser] = useState<IUser | null>(null);
 	const [token, setToken] = useState<string | null>(null);
 
-	const handleAuthenticate = async (userData: FormLoginParams) => {
+	const handleAuthenticate = useCallback(async (userData: FormLoginParams) => {
 		const { user, token } = await AuthServices.authenticate(userData);
 
 		await AsyncStorage.setItem(
@@ -41,9 +44,9 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
 		setUser(user);
 		setToken(token);
-	};
+	}, []);
 
-	const handleRegister = async (formData: FormRegisterParams) => {
+	const handleRegister = useCallback(async (formData: FormRegisterParams) => {
 		const { user, token } = await AuthServices.registerUser(formData);
 
 		await AsyncStorage.setItem(
@@ -56,9 +59,9 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
 		setUser(user);
 		setToken(token);
-	};
+	}, []);
 
-	const restoreUserSession = async () => {
+	const restoreUserSession = useCallback(async () => {
 		const userData = await AsyncStorage.getItem("dt-money-user");
 
 		if (userData) {
@@ -80,14 +83,19 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		}
 
 		return userData;
-	};
+	}, []);
 
-	const handleLogout = async () => {
+	const handleLogout = useCallback(async () => {
 		await AsyncStorage.clear();
 
 		setToken(null);
 		setUser(null);
-	};
+	}, []);
+
+	useEffect(() => {
+		setLogoutListener(handleLogout)
+		return () => setLogoutListener(null)
+	}, [handleLogout])
 
 	return (
 		<AuthContext.Provider

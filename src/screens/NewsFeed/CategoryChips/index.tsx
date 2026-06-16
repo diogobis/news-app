@@ -1,8 +1,7 @@
 import { useNewsContext } from '@/context/news.context'
-import { colors } from '@/shared/colors'
 import clsx from 'clsx'
-import { ScrollView, Text, TouchableOpacity } from 'react-native'
-import { categoryLabel, categoryColor } from '@/shared/utils/categoryLabels'
+import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native'
+import { CategoryTag } from '@/components/CategoryTag'
 
 const CATEGORIES = [
 	'politics',
@@ -34,7 +33,7 @@ export const CategoryChips = () => {
 			horizontal
 			showsHorizontalScrollIndicator={false}
 			className="py-4 pl-6"
-			style={{ flexGrow: 0, height: 56 }}
+			style={styles.scroll}
 		>
 			<TouchableOpacity
 				className={clsx(
@@ -54,25 +53,20 @@ export const CategoryChips = () => {
 			</TouchableOpacity>
 
 			{CATEGORIES.map((category) => (
-				<TouchableOpacity
+				<CategoryTag
 					key={category}
-					className={clsx(
-						'px-4 py-2 rounded-full mr-2',
-						selectedCategory === category ? '' : 'bg-background-tertiary',
-					)}
-					style={selectedCategory === category ? { backgroundColor: categoryColor(category) } : undefined}
+					category={category}
+					isActive={selectedCategory === category}
 					onPress={() => handleSelectCategory(category)}
-				>
-					<Text
-						className={clsx(
-							'text-sm',
-							selectedCategory === category ? 'text-white' : 'text-gray-500',
-						)}
-				>
-					{categoryLabel(category)}
-				</Text>
-				</TouchableOpacity>
+				/>
 			))}
 		</ScrollView>
 	)
 }
+
+const styles = StyleSheet.create({
+	scroll: {
+		flexGrow: 0,
+		height: 56,
+	},
+})

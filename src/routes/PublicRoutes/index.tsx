@@ -3,13 +3,7 @@ import { ArticleDetail } from '@/screens/ArticleDetail'
 import { Login } from '@/screens/Login'
 import { Register } from '@/screens/Register'
 import { createStackNavigator } from '@react-navigation/stack'
-
-export type PublicStackParamsList = {
-	NewsFeed: undefined
-	ArticleDetail: { uuid: string }
-	Login: undefined
-	Register: undefined
-}
+import { PublicStackParamsList } from '@/shared/interfaces/navigation.types'
 
 export const PublicRoutes = () => {
 	const PublicStack = createStackNavigator<PublicStackParamsList>()

@@ -1,38 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { useCallback, useEffect, useRef } from 'react'
+import { FlatList, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import { DrawerNavigationProp } from '@react-navigation/drawer'
 
+import { DrawerParamsList } from '@/shared/interfaces/navigation.types'
 import { useUserFeaturesContext } from '@/context/user-features.context'
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
-import { colors } from '@/shared/colors'
-import { DatePicker } from '@/components/DatePicker'
+import { SearchBar } from '@/components/SearchBar'
+import { DateFilterBar } from '@/components/DateFilterBar'
+import { DrawerScreenHeader } from '@/components/DrawerScreenHeader'
 import { FavoriteCard } from './FavoriteCard'
-
-type DrawerParamsList = {
-	Feed: undefined
-	Favorites: undefined
-	ReadLater: undefined
-	MutedKeywords: undefined
-	ArticleDetail: { uuid: string }
-}
 
 export const Favorites = () => {
 	const { favorites, fetchFavorites, handleToggleFavorite } = useUserFeaturesContext()
 	const { errorHandler } = useErrorHandler()
 	const navigation = useNavigation<DrawerNavigationProp<DrawerParamsList>>()
-	const [input, setInput] = useState('')
-	const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined)
-	const [dateTo, setDateTo] = useState<Date | undefined>(undefined)
-	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-	const dateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 	const searchRef = useRef('')
-	const dateFromRef = useRef<Date | undefined>(undefined)
-	const dateToRef = useRef<Date | undefined>(undefined)
-
-	const fmt = (d: Date | undefined) => d ? d.toISOString().slice(0, 10) : undefined
+	const dateFromRef = useRef<string | undefined>(undefined)
+	const dateToRef = useRef<string | undefined>(undefined)
 
 	const loadFavorites = useCallback(async (search?: string, publishedFrom?: string, publishedTo?: string) => {
 		try {
@@ -40,43 +26,11 @@ export const Favorites = () => {
 		} catch (error) {
 			errorHandler(error, 'Falha ao buscar favoritos')
 		}
-	}, [fetchFavorites, errorHandler])
+	}, [fetchFavorites])
 
 	useEffect(() => {
 		loadFavorites()
 	}, [])
-
-	const handleSearchChange = (text: string) => {
-		setInput(text)
-		if (debounceRef.current) clearTimeout(debounceRef.current)
-		debounceRef.current = setTimeout(() => {
-			searchRef.current = text
-			loadFavorites(text || undefined, fmt(dateFromRef.current), fmt(dateToRef.current))
-		}, 500)
-	}
-
-	const scheduleFilteredFetch = (from: Date | undefined, to: Date | undefined) => {
-		if (dateDebounceRef.current) clearTimeout(dateDebounceRef.current)
-		dateDebounceRef.current = setTimeout(() => {
-			dateFromRef.current = from
-			dateToRef.current = to
-			loadFavorites(searchRef.current || undefined, fmt(from), fmt(to))
-		}, 500)
-	}
-
-	const handleDateFromChange = (d: Date | undefined) => {
-		setDateFrom(d)
-		dateFromRef.current = d
-		scheduleFilteredFetch(d, dateToRef.current)
-	}
-
-	const handleDateToChange = (d: Date | undefined) => {
-		setDateTo(d)
-		dateToRef.current = d
-		scheduleFilteredFetch(dateFromRef.current, d)
-	}
-
-	const today = useMemo(() => new Date(), [])
 
 	const handleRemoveFavorite = useCallback(async (articleUuid: string) => {
 		try {
@@ -84,42 +38,30 @@ export const Favorites = () => {
 		} catch (error) {
 			errorHandler(error, 'Falha ao remover dos favoritos')
 		}
-	}, [handleToggleFavorite, errorHandler])
-
-	useEffect(() => {
-		return () => {
-			if (debounceRef.current) clearTimeout(debounceRef.current)
-			if (dateDebounceRef.current) clearTimeout(dateDebounceRef.current)
-		}
-	}, [])
+	}, [handleToggleFavorite])
 
 	return (
 		<SafeAreaView className="flex-1 bg-background-primary">
-			<View className="flex-row items-center justify-between p-4">
-				<Text className="text-white text-xl font-bold">Favoritos</Text>
-				<TouchableOpacity onPress={() => navigation.toggleDrawer()}>
-					<MaterialIcons name="menu" size={24} color={colors.white} />
-				</TouchableOpacity>
-			</View>
+			<DrawerScreenHeader title="Favoritos" />
 
 			<View className="px-6 pb-2">
-				<View className="flex-row items-center bg-background-tertiary rounded-xl px-4 h-12">
-					<MaterialIcons name="search" size={20} color={colors.gray[600]} />
-					<TextInput
-						className="flex-1 text-white text-base ml-2"
-						placeholder="Buscar favoritos..."
-						placeholderTextColor={colors.gray[600]}
-						value={input}
-						onChangeText={handleSearchChange}
-					/>
-				</View>
+				<SearchBar
+					placeholder="Buscar favoritos..."
+					onSearch={(text) => {
+						searchRef.current = text
+						loadFavorites(text || undefined, dateFromRef.current, dateToRef.current)
+					}}
+				/>
 			</View>
-			<View className="flex-row px-6 pb-3 gap-2">
-				<DatePicker value={dateFrom} onChange={handleDateFromChange} placeholder="De" maxDate={dateTo ?? today} />
-				<DatePicker value={dateTo} onChange={handleDateToChange} placeholder="Até" minDate={dateFrom} maxDate={today} />
-			</View>
+			<DateFilterBar
+				onFilterChange={(from, to) => {
+					dateFromRef.current = from
+					dateToRef.current = to
+					loadFavorites(searchRef.current || undefined, from, to)
+				}}
+			/>
 
-			<View style={{ flex: 1, minHeight: 0 }}>
+			<View style={styles.wrapper}>
 				<FlatList
 					data={favorites}
 					keyExtractor={(item) => `fav-${item.articleUuid}`}
@@ -132,7 +74,9 @@ export const Favorites = () => {
 					)}
 					ListEmptyComponent={() => (
 						<Text className="text-white text-center mt-10 text-lg">
-							{input || dateFrom || dateTo ? 'Nenhum favorito encontrado' : 'Nenhum favorito ainda'}
+							{searchRef.current || dateFromRef.current || dateToRef.current
+								? 'Nenhum favorito encontrado'
+								: 'Nenhum favorito ainda'}
 						</Text>
 					)}
 				/>
@@ -140,3 +84,10 @@ export const Favorites = () => {
 		</SafeAreaView>
 	)
 }
+
+const styles = StyleSheet.create({
+	wrapper: {
+		flex: 1,
+		minHeight: 0,
+	},
+})

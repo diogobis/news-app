@@ -16,6 +16,10 @@ export const createComment = async (payload: CreateCommentPayload): Promise<void
 	await dtMoneyApi.post('/comments', payload)
 }
 
+export const updateComment = async (id: number, content: string): Promise<void> => {
+	await dtMoneyApi.put(`/comments/${id}`, { content })
+}
+
 export const deleteComment = async (id: number): Promise<void> => {
 	await dtMoneyApi.delete(`/comments/${id}`)
 }

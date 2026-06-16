@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Image, ScrollView, Text, useWindowDimensions, View } from 'react-native'
-import RenderHtml from 'react-native-render-html'
+import { ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { MaterialIcons } from '@expo/vector-icons'
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 
 import { ArticleDetail as ArticleDetailType } from '@/shared/interfaces/news/article-detail.interface'
 import * as NewsService from '@/shared/services/news/news.service'
@@ -14,10 +10,9 @@ import { useUserFeaturesContext } from '@/context/user-features.context'
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
 import { useSnackbarContext } from '@/context/snackbar.context'
 import { colors } from '@/shared/colors'
-import { categoryLabel, categoryColor } from '@/shared/utils/categoryLabels'
 import { ArticleDetailHeader } from './ArticleDetailHeader'
+import { ArticleContent } from './ArticleContent'
 import { ArticleActions } from './ArticleActions'
-import { Comments } from './Comments'
 
 type DetailRouteParams = {
 	ArticleDetail: { uuid: string }
@@ -40,7 +35,6 @@ export const ArticleDetail = () => {
 
 	const [article, setArticle] = useState<ArticleDetailType | null>(null)
 	const [loading, setLoading] = useState(true)
-	const { width } = useWindowDimensions()
 
 	const fetchDetails = useCallback(async () => {
 		try {
@@ -94,85 +88,11 @@ export const ArticleDetail = () => {
 		)
 	}
 
-	const publishedDate = article.publishedAt
-		? format(new Date(article.publishedAt), "d 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })
-		: null
-
 	return (
 		<SafeAreaView className="flex-1 bg-background-primary">
 			<ArticleDetailHeader publisher={article.publisher} onGoBack={() => navigation.goBack()} />
 
-			<View style={{ flex: 1, minHeight: 0 }}>
-				<ScrollView className="flex-1 px-4">
-					<Text className="text-white text-2xl font-bold mb-4">{article.title}</Text>
-
-					<View className="flex-row items-center mb-4">
-						<MaterialIcons name="newspaper" size={16} color={colors.gray[500]} />
-						<Text className="text-gray-500 text-base ml-2">
-							{article.publisher || 'Fonte desconhecida'}
-						</Text>
-					</View>
-
-					{publishedDate && (
-						<View className="flex-row items-center mb-4">
-							<MaterialIcons name="calendar-today" size={16} color={colors.gray[600]} />
-							<Text className="text-gray-600 text-base ml-2">{publishedDate}</Text>
-						</View>
-					)}
-
-					<View className="flex-row flex-wrap gap-2 mb-6">
-						{article.categories.map((cat) => (
-							<View
-								key={cat}
-								className="px-3 py-1 rounded"
-								style={{ backgroundColor: categoryColor(cat) + '20' }}
-							>
-								<Text className="text-sm" style={{ color: categoryColor(cat) }}>
-									{categoryLabel(cat)}
-								</Text>
-							</View>
-						))}
-					</View>
-
-					<View className="h-60 bg-background-secondary rounded-xl mb-6 overflow-hidden items-center justify-center">
-						{article.thumbnail ? (
-							<Image source={{ uri: article.thumbnail }} className="w-full h-full" resizeMode="cover" />
-						) : (
-							<MaterialIcons name="image" size={64} color={colors.gray[600]} />
-						)}
-					</View>
-
-					{article.authors && (() => {
-						let parsed: string[]
-						try {
-							const result = JSON.parse(article.authors)
-							parsed = Array.isArray(result) ? result : [result]
-						} catch {
-							parsed = article.authors.split(',').map((a: string) => a.trim()).filter(Boolean)
-						}
-						return parsed.length > 0 ? (
-							<View className="flex-row items-center mb-4">
-								<MaterialIcons name="person" size={16} color={colors.gray[500]} />
-								<Text className="text-gray-500 text-base ml-2">{parsed.join(', ')}</Text>
-							</View>
-						) : null
-					})()}
-
-					{article.body ? (
-						<RenderHtml
-							contentWidth={width}
-							source={{ html: `<body style="color:#9CA3AF;font-size:16px;line-height:1.6">${article.body}</body>` }}
-							baseStyle={{ color: '#9CA3AF', fontSize: 16, lineHeight: 26 }}
-						/>
-					) : (
-						<Text className="text-gray-600 text-base italic mb-8">
-							Conteúdo não disponível
-						</Text>
-					)}
-
-					<Comments articleUuid={uuid} />
-				</ScrollView>
-			</View>
+			<ArticleContent article={article} />
 
 			<ArticleActions
 				user={user}

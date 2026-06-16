@@ -27,7 +27,7 @@ export const Loading: FC<LoadingParams> = ({ setLoading }) => {
 				setLoading(false);
 			}
 		})();
-	}, []);
+	}, [restoreUserSession, handleLogout, setLoading]);
 
 	return (
 		<SafeAreaView className="flex-1 bg-background-primary items-center justify-center">

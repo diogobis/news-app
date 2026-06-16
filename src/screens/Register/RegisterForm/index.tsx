@@ -3,7 +3,7 @@ import { AppInput } from "@/components/AppInput";
 import { AppButton } from "@/components/AppButton";
 import { ActivityIndicator, Text, View } from "react-native";
 
-import { PublicStackParamsList } from "@/routes/PublicRoutes";
+import { PublicStackParamsList } from "@/shared/interfaces/navigation.types";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 

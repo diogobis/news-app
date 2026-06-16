@@ -7,18 +7,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { DrawerContent } from '@/components/DrawerContent'
 import { colors } from '@/shared/colors'
-
-export type PrivateStackParamsList = {
-	Drawer: undefined
-	ArticleDetail: { uuid: string }
-}
-
-export type DrawerParamsList = {
-	Feed: undefined
-	Favorites: undefined
-	ReadLater: undefined
-	MutedKeywords: undefined
-}
+import { PrivateStackParamsList, DrawerParamsList } from '@/shared/interfaces/navigation.types'
 
 const PrivateStack = createStackNavigator<PrivateStackParamsList>()
 const Drawer = createDrawerNavigator<DrawerParamsList>()

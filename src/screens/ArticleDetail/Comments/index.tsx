@@ -1,24 +1,26 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
 	ActivityIndicator,
+	FlatList,
 	Text,
 	TextInput,
 	TouchableOpacity,
 	View,
 } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
-import { formatDistanceToNow } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 
 import { CommentItem } from '@/shared/interfaces/news/comment.interface'
 import * as CommentsService from '@/shared/services/news/comments.service'
 import { useAuthContext } from '@/context/auth.context'
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
 import { colors } from '@/shared/colors'
+import { CommentCard } from './CommentCard'
 
 interface CommentsProps {
 	articleUuid: string
 }
+
+type FlattenedComment = CommentItem & { depth: number }
 
 export const Comments = ({ articleUuid }: CommentsProps) => {
 	const { user } = useAuthContext()
@@ -29,6 +31,15 @@ export const Comments = ({ articleUuid }: CommentsProps) => {
 	const [content, setContent] = useState('')
 	const [replyingTo, setReplyingTo] = useState<{ id: number; username: string } | null>(null)
 	const [submitting, setSubmitting] = useState(false)
+
+	const flattened = useMemo(() => {
+		const result: FlattenedComment[] = []
+		comments.forEach((c) => {
+			result.push({ ...c, depth: 0 })
+			c.replies.forEach((r) => result.push({ ...r, depth: 1 }))
+		})
+		return result
+	}, [comments])
 
 	const fetchComments = useCallback(async () => {
 		try {
@@ -66,6 +77,15 @@ export const Comments = ({ articleUuid }: CommentsProps) => {
 		}
 	}
 
+	const handleEdit = async (commentId: number, content: string) => {
+		try {
+			await CommentsService.updateComment(commentId, content)
+			await fetchComments()
+		} catch (error) {
+			errorHandler(error, 'Falha ao editar comentário')
+		}
+	}
+
 	const handleDelete = async (commentId: number) => {
 		try {
 			await CommentsService.deleteComment(commentId)
@@ -80,6 +100,18 @@ export const Comments = ({ articleUuid }: CommentsProps) => {
 		setContent('')
 	}
 
+	const renderComment = ({ item }: { item: FlattenedComment }) => (
+		<View style={item.depth === 1 ? { marginLeft: 24 } : undefined}>
+			<CommentCard
+				comment={item}
+				currentUserId={user?.id ?? null}
+				onReply={(id, username) => setReplyingTo({ id, username })}
+				onDelete={handleDelete}
+				onEdit={handleEdit}
+			/>
+		</View>
+	)
+
 	return (
 		<View className="mt-8 mb-4">
 			<View className="flex-row items-center mb-6">
@@ -90,32 +122,18 @@ export const Comments = ({ articleUuid }: CommentsProps) => {
 
 			{loading ? (
 				<ActivityIndicator color={colors['accent-brand-light']} size="large" />
-			) : comments.length === 0 ? (
-				<Text className="text-gray-500 text-base text-center mb-6">
-					Nenhum comentário ainda. Seja o primeiro a comentar!
-				</Text>
 			) : (
-				comments.map((comment) => (
-					<View key={comment.id}>
-						<CommentCard
-							comment={comment}
-							currentUserId={user?.id ?? null}
-							onReply={(id, username) => setReplyingTo({ id, username })}
-							onDelete={handleDelete}
-						/>
-
-						{comment.replies.map((reply) => (
-							<View key={reply.id} className="ml-6">
-								<CommentCard
-									comment={reply}
-									currentUserId={user?.id ?? null}
-									onReply={(id, username) => setReplyingTo({ id, username })}
-									onDelete={handleDelete}
-								/>
-							</View>
-						))}
-					</View>
-				))
+				<FlatList
+					data={flattened}
+					keyExtractor={(item) => `comment-${item.id}`}
+					renderItem={renderComment}
+					scrollEnabled={false}
+					ListEmptyComponent={
+						<Text className="text-gray-500 text-base text-center mb-6">
+							Nenhum comentário ainda. Seja o primeiro a comentar!
+						</Text>
+					}
+				/>
 			)}
 
 			{user ? (
@@ -145,7 +163,6 @@ export const Comments = ({ articleUuid }: CommentsProps) => {
 							className="ml-2 bg-accent-brand h-12 w-12 rounded-xl items-center justify-center"
 							onPress={handleSubmit}
 							disabled={!content.trim() || submitting}
-							style={{ opacity: !content.trim() || submitting ? 0.5 : 1 }}
 						>
 							{submitting ? (
 								<ActivityIndicator color={colors.white} size="small" />
@@ -160,58 +177,6 @@ export const Comments = ({ articleUuid }: CommentsProps) => {
 					Faça login para comentar
 				</Text>
 			)}
-		</View>
-	)
-}
-
-interface CommentCardProps {
-	comment: CommentItem
-	currentUserId: number | null
-	onReply: (id: number, username: string) => void
-	onDelete: (id: number) => void
-}
-
-const CommentCard = ({ comment, currentUserId, onReply, onDelete }: CommentCardProps) => {
-	const timeAgo = formatDistanceToNow(new Date(comment.createdAt), {
-		addSuffix: true,
-		locale: ptBR,
-	})
-
-	const isOwner = currentUserId === comment.userId
-
-	return (
-		<View className="mb-4 bg-background-tertiary rounded-xl p-4">
-			<View className="flex-row items-center mb-2">
-				<View className="w-8 h-8 rounded-full bg-accent-brand items-center justify-center mr-2">
-					<Text className="text-white text-xs font-bold">
-						{comment.username.charAt(0).toUpperCase()}
-					</Text>
-				</View>
-				<Text className="text-white text-sm font-bold flex-1">@{comment.username}</Text>
-				<Text className="text-gray-600 text-xs">{timeAgo}</Text>
-			</View>
-
-			<Text className="text-gray-400 text-base mb-3">{comment.content}</Text>
-
-			<View className="flex-row items-center">
-				<TouchableOpacity
-					className="flex-row items-center mr-4"
-					onPress={() => onReply(comment.parentId ?? comment.id, comment.username)}
-				>
-					<MaterialIcons name="reply" size={16} color={colors.gray[500]} />
-					<Text className="text-gray-500 text-sm ml-1">Responder</Text>
-				</TouchableOpacity>
-
-				{isOwner && (
-					<TouchableOpacity
-						className="flex-row items-center"
-						onPress={() => onDelete(comment.id)}
-					>
-						<MaterialIcons name="delete-outline" size={16} color={colors['accent-red']} />
-						<Text className="text-accent-red text-sm ml-1">Deletar</Text>
-					</TouchableOpacity>
-				)}
-			</View>
 		</View>
 	)
 }

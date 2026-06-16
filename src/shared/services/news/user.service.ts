@@ -4,9 +4,14 @@ import { FavoriteItem } from '@/shared/interfaces/news/favorite.interface'
 import { ReadLaterItem } from '@/shared/interfaces/news/read-later.interface'
 import { MutedKeyword } from '@/shared/interfaces/news/muted-keyword.interface'
 
-// Favorites
-export const getFavorites = async (): Promise<FavoriteItem[]> => {
-	const { data } = await dtMoneyApi.get<{ data: FavoriteItem[] }>('/me/favorites')
+interface FavoritesFilterParams {
+	search?: string
+	publishedFrom?: string
+	publishedTo?: string
+}
+
+export const getFavorites = async (params?: FavoritesFilterParams): Promise<FavoriteItem[]> => {
+	const { data } = await dtMoneyApi.get<{ data: FavoriteItem[] }>('/me/favorites', { params })
 	return data.data
 }
 
@@ -18,9 +23,14 @@ export const removeFavorite = async (articleUuid: string): Promise<void> => {
 	await dtMoneyApi.delete(`/me/favorites/${articleUuid}`)
 }
 
-// Read Later
-export const getReadLater = async (): Promise<ReadLaterItem[]> => {
-	const { data } = await dtMoneyApi.get<{ data: ReadLaterItem[] }>('/me/read-later')
+interface ReadLaterFilterParams {
+	search?: string
+	publishedFrom?: string
+	publishedTo?: string
+}
+
+export const getReadLater = async (params?: ReadLaterFilterParams): Promise<ReadLaterItem[]> => {
+	const { data } = await dtMoneyApi.get<{ data: ReadLaterItem[] }>('/me/read-later', { params })
 	return data.data
 }
 

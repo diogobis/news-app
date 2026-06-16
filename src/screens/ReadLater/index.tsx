@@ -1,64 +1,80 @@
-	import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-import { StackNavigationProp } from '@react-navigation/stack'
+import { DrawerNavigationProp } from '@react-navigation/drawer'
 
 import { useUserFeaturesContext } from '@/context/user-features.context'
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
 import { colors } from '@/shared/colors'
 import { DatePicker } from '@/components/DatePicker'
+import { ReadLaterCard } from './ReadLaterCard'
+
+type DrawerParamsList = {
+	Feed: undefined
+	Favorites: undefined
+	ReadLater: undefined
+	MutedKeywords: undefined
+	ArticleDetail: { uuid: string }
+}
 
 export const ReadLater = () => {
 	const { readLater, fetchReadLater, handleRemoveReadLater } = useUserFeaturesContext()
 	const { errorHandler } = useErrorHandler()
-	const navigation = useNavigation<StackNavigationProp<any>>()
+	const navigation = useNavigation<DrawerNavigationProp<DrawerParamsList>>()
 	const [input, setInput] = useState('')
-	const [debounced, setDebounced] = useState('')
-	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-	useEffect(() => {
-		if (debounceRef.current) clearTimeout(debounceRef.current)
-		debounceRef.current = setTimeout(() => setDebounced(input), 500)
-		return () => {
-			if (debounceRef.current) clearTimeout(debounceRef.current)
-		}
-	}, [input])
-
-	useEffect(() => {
-		const load = async () => {
-			try {
-				await fetchReadLater()
-			} catch (error) {
-				errorHandler(error, 'Falha ao buscar lista de leitura')
-			}
-		}
-		load()
-	}, [])
-
 	const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined)
 	const [dateTo, setDateTo] = useState<Date | undefined>(undefined)
+	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const dateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const searchRef = useRef('')
+	const dateFromRef = useRef<Date | undefined>(undefined)
+	const dateToRef = useRef<Date | undefined>(undefined)
 
-	const filtered = useMemo(() => {
-		let result = readLater
+	const fmt = (d: Date | undefined) => d ? d.toISOString().slice(0, 10) : undefined
 
-		if (debounced) {
-			result = result.filter((r) => r.title.toLowerCase().includes(debounced.toLowerCase()))
+	const loadReadLater = useCallback(async (search?: string, publishedFrom?: string, publishedTo?: string) => {
+		try {
+			await fetchReadLater({ search, publishedFrom, publishedTo })
+		} catch (error) {
+			errorHandler(error, 'Falha ao buscar lista de leitura')
 		}
+	}, [fetchReadLater, errorHandler])
 
-		if (dateFrom || dateTo) {
-			result = result.filter((r) => {
-				if (!r.publishedAt) return false
-				const date = new Date(r.publishedAt).getTime()
-				if (dateFrom && date < dateFrom.getTime()) return false
-				if (dateTo && date > new Date(dateTo.getTime() + 86400000).getTime()) return false
-				return true
-			})
-		}
+	useEffect(() => {
+		loadReadLater()
+	}, [])
 
-		return result
-	}, [readLater, debounced, dateFrom, dateTo])
+	const handleSearchChange = (text: string) => {
+		setInput(text)
+		if (debounceRef.current) clearTimeout(debounceRef.current)
+		debounceRef.current = setTimeout(() => {
+			searchRef.current = text
+			loadReadLater(text || undefined, fmt(dateFromRef.current), fmt(dateToRef.current))
+		}, 500)
+	}
+
+	const scheduleFilteredFetch = (from: Date | undefined, to: Date | undefined) => {
+		if (dateDebounceRef.current) clearTimeout(dateDebounceRef.current)
+		dateDebounceRef.current = setTimeout(() => {
+			dateFromRef.current = from
+			dateToRef.current = to
+			loadReadLater(searchRef.current || undefined, fmt(from), fmt(to))
+		}, 500)
+	}
+
+	const handleDateFromChange = (d: Date | undefined) => {
+		setDateFrom(d)
+		dateFromRef.current = d
+		scheduleFilteredFetch(d, dateToRef.current)
+	}
+
+	const handleDateToChange = (d: Date | undefined) => {
+		setDateTo(d)
+		dateToRef.current = d
+		scheduleFilteredFetch(dateFromRef.current, d)
+	}
 
 	const today = useMemo(() => new Date(), [])
 
@@ -68,15 +84,22 @@ export const ReadLater = () => {
 		} catch (error) {
 			errorHandler(error, 'Falha ao remover')
 		}
-	}, [handleRemoveReadLater])
+	}, [handleRemoveReadLater, errorHandler])
+
+	useEffect(() => {
+		return () => {
+			if (debounceRef.current) clearTimeout(debounceRef.current)
+			if (dateDebounceRef.current) clearTimeout(dateDebounceRef.current)
+		}
+	}, [])
 
 	return (
 		<SafeAreaView className="flex-1 bg-background-primary">
-			<View className="flex-row items-center p-4">
-				<TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
-					<MaterialIcons name="arrow-back" size={24} color={colors.white} />
-				</TouchableOpacity>
+			<View className="flex-row items-center justify-between p-4">
 				<Text className="text-white text-xl font-bold">Ler depois</Text>
+				<TouchableOpacity onPress={() => navigation.toggleDrawer()}>
+					<MaterialIcons name="menu" size={24} color={colors.white} />
+				</TouchableOpacity>
 			</View>
 
 			<View className="px-6 pb-2">
@@ -87,49 +110,29 @@ export const ReadLater = () => {
 						placeholder="Buscar na lista..."
 						placeholderTextColor={colors.gray[600]}
 						value={input}
-						onChangeText={setInput}
+						onChangeText={handleSearchChange}
 					/>
 				</View>
 			</View>
 			<View className="flex-row px-6 pb-3 gap-2">
-				<DatePicker value={dateFrom} onChange={setDateFrom} placeholder="De" maxDate={dateTo ?? today} />
-				<DatePicker value={dateTo} onChange={setDateTo} placeholder="Até" minDate={dateFrom} maxDate={today} />
+				<DatePicker value={dateFrom} onChange={handleDateFromChange} placeholder="De" maxDate={dateTo ?? today} />
+				<DatePicker value={dateTo} onChange={handleDateToChange} placeholder="Até" minDate={dateFrom} maxDate={today} />
 			</View>
 
 			<View style={{ flex: 1, minHeight: 0 }}>
 				<FlatList
-					data={filtered}
+					data={readLater}
 					keyExtractor={(item) => `rl-${item.articleUuid}`}
 					renderItem={({ item }) => (
-						<TouchableOpacity
-							className="mx-6 mb-4 bg-background-tertiary rounded-xl overflow-hidden"
+						<ReadLaterCard
+							item={item}
 							onPress={() => navigation.navigate('ArticleDetail', { uuid: item.articleUuid })}
-						>
-							<View className="h-40 bg-background-primary items-center justify-center">
-								{item.thumbnail ? (
-									<Image source={{ uri: item.thumbnail }} className="w-full h-full" resizeMode="cover" />
-								) : (
-									<MaterialIcons name="bookmark" size={48} color={colors.gray[600]} />
-								)}
-							</View>
-							<View className="p-4">
-								<Text className="text-white text-base font-bold mb-1" numberOfLines={2}>
-									{item.title}
-								</Text>
-								<Text className="text-gray-500 text-sm mb-3">{item.publisher}</Text>
-								<TouchableOpacity
-									className="flex-row items-center"
-									onPress={() => handleRemove(item.articleUuid)}
-								>
-									<MaterialIcons name="bookmark-remove" size={20} color={colors['accent-red']} />
-									<Text className="text-accent-red text-sm ml-2">Remover</Text>
-								</TouchableOpacity>
-							</View>
-						</TouchableOpacity>
+							onRemove={() => handleRemove(item.articleUuid)}
+						/>
 					)}
 					ListEmptyComponent={() => (
 						<Text className="text-white text-center mt-10 text-lg">
-							{debounced ? 'Nenhum artigo encontrado' : 'Nenhum artigo salvo'}
+							{input || dateFrom || dateTo ? 'Nenhum artigo encontrado' : 'Nenhum artigo salvo'}
 						</Text>
 					)}
 				/>

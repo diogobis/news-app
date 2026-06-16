@@ -4,6 +4,7 @@ import {
 	createContext,
 	useCallback,
 	useContext,
+	useRef,
 	useState,
 } from 'react'
 import { Article } from '@/shared/interfaces/news/article.interface'
@@ -46,6 +47,7 @@ export const NewsContext = createContext({} as NewsContextType)
 
 export const NewsContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	const { user } = useAuthContext()
+	const loadMoreLockRef = useRef(false)
 	const [articles, setArticles] = useState<Article[]>([])
 	const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 	const [searchTerm, setSearchTerm] = useState('')
@@ -69,10 +71,10 @@ export const NewsContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
 	const fetchNews = useCallback(async (params?: { page?: number; category?: string; search?: string; publishedFrom?: string; publishedTo?: string }) => {
 		const page = params?.page ?? 1
-		const category = params?.category ?? selectedCategory ?? undefined
-		const search = params?.search ?? (searchTerm || undefined)
-		const publishedFrom = params?.publishedFrom ?? (dateFrom || undefined)
-		const publishedTo = params?.publishedTo ?? (dateTo || undefined)
+		const category = params && 'category' in params ? (params.category ?? undefined) : (selectedCategory ?? undefined)
+		const search = params && 'search' in params ? (params.search ?? undefined) : (searchTerm || undefined)
+		const publishedFrom = params && 'publishedFrom' in params ? (params.publishedFrom ?? undefined) : (dateFrom || undefined)
+		const publishedTo = params && 'publishedTo' in params ? (params.publishedTo ?? undefined) : (dateTo || undefined)
 
 		const service = user ? UserService.getUserNews : NewsService.getNews
 		const response = await service({ page, limit: 15, category, search, publishedFrom, publishedTo })
@@ -93,9 +95,9 @@ export const NewsContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
 	const refreshNews = useCallback(async (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => {
 		const category = selectedCategory ?? undefined
-		const search = params?.search ?? (searchTerm || undefined)
-		const publishedFrom = params?.publishedFrom ?? (dateFrom || undefined)
-		const publishedTo = params?.publishedTo ?? (dateTo || undefined)
+		const search = params && 'search' in params ? (params.search ?? undefined) : (searchTerm || undefined)
+		const publishedFrom = params && 'publishedFrom' in params ? (params.publishedFrom ?? undefined) : (dateFrom || undefined)
+		const publishedTo = params && 'publishedTo' in params ? (params.publishedTo ?? undefined) : (dateTo || undefined)
 		const service = user ? UserService.getUserNews : NewsService.getNews
 		const response = await service({ page: 1, limit: 15, category, search, publishedFrom, publishedTo })
 
@@ -109,12 +111,13 @@ export const NewsContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	}, [selectedCategory, searchTerm, dateFrom, dateTo, user])
 
 	const loadMoreNews = useCallback(async (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => {
-		if (loadings.loadMore || pagination.page >= pagination.totalPages) return
+		if (loadMoreLockRef.current || pagination.page >= pagination.totalPages) return
+		loadMoreLockRef.current = true
 
 		const category = selectedCategory ?? undefined
-		const search = params?.search ?? (searchTerm || undefined)
-		const publishedFrom = params?.publishedFrom ?? (dateFrom || undefined)
-		const publishedTo = params?.publishedTo ?? (dateTo || undefined)
+		const search = params && 'search' in params ? (params.search ?? undefined) : (searchTerm || undefined)
+		const publishedFrom = params && 'publishedFrom' in params ? (params.publishedFrom ?? undefined) : (dateFrom || undefined)
+		const publishedTo = params && 'publishedTo' in params ? (params.publishedTo ?? undefined) : (dateTo || undefined)
 		const service = user ? UserService.getUserNews : NewsService.getNews
 		const response = await service({ page: pagination.page + 1, limit: 15, category, search, publishedFrom, publishedTo })
 
@@ -125,7 +128,8 @@ export const NewsContextProvider: FC<PropsWithChildren> = ({ children }) => {
 			totalRows: response.meta.total,
 			totalPages: Math.ceil(response.meta.total / 15),
 		}))
-	}, [loadings.loadMore, pagination, selectedCategory, searchTerm, dateFrom, dateTo, user])
+		loadMoreLockRef.current = false
+	}, [pagination, selectedCategory, searchTerm, dateFrom, dateTo, user])
 
 	return (
 		<NewsContext.Provider

@@ -4,12 +4,14 @@ import { MaterialIcons } from '@expo/vector-icons'
 import { Text, TouchableOpacity, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
+import { DrawerNavigationProp } from '@react-navigation/drawer'
 
 type PublicStackParamsList = {
 	Login: undefined
 }
 
-type PrivateStackParamsList = {
+type DrawerParamsList = {
+	Feed: undefined
 	Favorites: undefined
 	ReadLater: undefined
 	MutedKeywords: undefined
@@ -18,7 +20,7 @@ type PrivateStackParamsList = {
 export const AppHeader = () => {
 	const { user, handleLogout } = useAuthContext()
 	const publicNavigation = useNavigation<StackNavigationProp<PublicStackParamsList>>()
-	const privateNavigation = useNavigation<StackNavigationProp<PrivateStackParamsList>>()
+	const drawerNavigation = useNavigation<DrawerNavigationProp<DrawerParamsList>>()
 
 	return (
 		<View className="w-full flex-row p-8 justify-between items-center bg-background-primary">
@@ -28,26 +30,8 @@ export const AppHeader = () => {
 
 			{user ? (
 				<View className="flex-row items-center gap-4">
-					<TouchableOpacity
-						onPress={() => privateNavigation.navigate('Favorites')}
-					>
-						<MaterialIcons name="favorite-outline" color={colors.white} size={24} />
-					</TouchableOpacity>
-
-					<TouchableOpacity
-						onPress={() => privateNavigation.navigate('ReadLater')}
-					>
-						<MaterialIcons name="bookmark-outline" color={colors.white} size={24} />
-					</TouchableOpacity>
-
-					<TouchableOpacity
-						onPress={() => privateNavigation.navigate('MutedKeywords')}
-					>
-						<MaterialIcons name="volume-off" color={colors.white} size={24} />
-					</TouchableOpacity>
-
-					<TouchableOpacity onPress={handleLogout}>
-						<MaterialIcons name="logout" color={colors.gray[700]} size={24} />
+					<TouchableOpacity onPress={() => drawerNavigation.toggleDrawer()}>
+						<MaterialIcons name="menu" color={colors.white} size={28} />
 					</TouchableOpacity>
 				</View>
 			) : (

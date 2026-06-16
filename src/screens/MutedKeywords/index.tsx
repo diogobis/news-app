@@ -10,16 +10,24 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
+import { DrawerNavigationProp } from '@react-navigation/drawer'
 
 import { useUserFeaturesContext } from '@/context/user-features.context'
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
 import { colors } from '@/shared/colors'
 
+type DrawerParamsList = {
+	Feed: undefined
+	Favorites: undefined
+	ReadLater: undefined
+	MutedKeywords: undefined
+}
+
 export const MutedKeywords = () => {
 	const { mutedKeywords, fetchMutedKeywords, handleAddMutedKeyword, handleRemoveMutedKeyword } =
 		useUserFeaturesContext()
 	const { errorHandler } = useErrorHandler()
-	const navigation = useNavigation()
+	const navigation = useNavigation<DrawerNavigationProp<DrawerParamsList>>()
 
 	const [keyword, setKeyword] = useState('')
 	const [adding, setAdding] = useState(false)
@@ -50,11 +58,11 @@ export const MutedKeywords = () => {
 
 	return (
 		<SafeAreaView className="flex-1 bg-background-primary">
-			<View className="flex-row items-center p-4">
-				<TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
-					<MaterialIcons name="arrow-back" size={24} color={colors.white} />
-				</TouchableOpacity>
+			<View className="flex-row items-center justify-between p-4">
 				<Text className="text-white text-xl font-bold">Palavras silenciadas</Text>
+				<TouchableOpacity onPress={() => navigation.toggleDrawer()}>
+					<MaterialIcons name="menu" size={24} color={colors.white} />
+				</TouchableOpacity>
 			</View>
 
 			<View className="flex-row items-center mx-6 mb-6">

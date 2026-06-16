@@ -16,8 +16,8 @@ type UserFeaturesContextType = {
 	favorites: FavoriteItem[]
 	readLater: ReadLaterItem[]
 	mutedKeywords: MutedKeyword[]
-	fetchFavorites: () => Promise<void>
-	fetchReadLater: () => Promise<void>
+	fetchFavorites: (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => Promise<void>
+	fetchReadLater: (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => Promise<void>
 	fetchMutedKeywords: () => Promise<void>
 	handleToggleFavorite: (articleUuid: string) => Promise<void>
 	handleSaveReadLater: (articleUuid: string) => Promise<void>
@@ -34,15 +34,15 @@ export const UserFeaturesContextProvider: FC<PropsWithChildren> = ({ children })
 	const [readLater, setReadLater] = useState<ReadLaterItem[]>([])
 	const [mutedKeywords, setMutedKeywords] = useState<MutedKeyword[]>([])
 
-	const fetchFavorites = useCallback(async () => {
+	const fetchFavorites = useCallback(async (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => {
 		if (!user) return
-		const items = await UserService.getFavorites()
+		const items = await UserService.getFavorites(params)
 		setFavorites(items)
 	}, [user])
 
-	const fetchReadLater = useCallback(async () => {
+	const fetchReadLater = useCallback(async (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => {
 		if (!user) return
-		const items = await UserService.getReadLater()
+		const items = await UserService.getReadLater(params)
 		setReadLater(items)
 	}, [user])
 

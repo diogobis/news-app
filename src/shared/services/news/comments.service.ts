@@ -1,4 +1,4 @@
-import { dtMoneyApi } from '@/shared/api/dtmoney'
+import { newsApi } from '@/shared/api/news'
 import { CommentItem } from '@/shared/interfaces/news/comment.interface'
 
 interface CreateCommentPayload {
@@ -8,18 +8,18 @@ interface CreateCommentPayload {
 }
 
 export const getComments = async (articleUuid: string): Promise<CommentItem[]> => {
-	const { data } = await dtMoneyApi.get<{ data: CommentItem[] }>(`/comments/${articleUuid}`)
+	const { data } = await newsApi.get<{ data: CommentItem[] }>(`/comments/${articleUuid}`)
 	return data.data.map((c) => ({ ...c, replies: c.replies ?? [] }))
 }
 
 export const createComment = async (payload: CreateCommentPayload): Promise<void> => {
-	await dtMoneyApi.post('/comments', payload)
+	await newsApi.post('/comments', payload)
 }
 
 export const updateComment = async (id: number, content: string): Promise<void> => {
-	await dtMoneyApi.put(`/comments/${id}`, { content })
+	await newsApi.put(`/comments/${id}`, { content })
 }
 
 export const deleteComment = async (id: number): Promise<void> => {
-	await dtMoneyApi.delete(`/comments/${id}`)
+	await newsApi.delete(`/comments/${id}`)
 }

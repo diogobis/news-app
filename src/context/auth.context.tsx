@@ -9,7 +9,7 @@ import {
 	useEffect,
 	useState,
 } from "react";
-import * as AuthServices from "@/shared/services/dtMoney/auth.service";
+import * as AuthServices from "@/shared/services/news/auth.service";
 import { IUser } from "@/shared/interfaces/user.interface";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -35,7 +35,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		const { user, token } = await AuthServices.authenticate(userData);
 
 		await AsyncStorage.setItem(
-			"dt-money-user",
+			"news-user",
 			JSON.stringify({
 				user,
 				token,
@@ -50,7 +50,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		const { user, token } = await AuthServices.registerUser(formData);
 
 		await AsyncStorage.setItem(
-			"dt-money-user",
+			"news-user",
 			JSON.stringify({
 				user,
 				token,
@@ -62,7 +62,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	}, []);
 
 	const restoreUserSession = useCallback(async () => {
-		const userData = await AsyncStorage.getItem("dt-money-user");
+		const userData = await AsyncStorage.getItem("news-user");
 
 		if (userData) {
 			try {

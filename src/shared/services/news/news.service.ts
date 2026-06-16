@@ -1,4 +1,4 @@
-import { dtMoneyApi } from '@/shared/api/dtmoney'
+import { newsApi } from '@/shared/api/news'
 import { Article } from '@/shared/interfaces/news/article.interface'
 import { ArticleDetail } from '@/shared/interfaces/news/article-detail.interface'
 
@@ -22,12 +22,12 @@ interface GetNewsResponse {
 }
 
 export const getNews = async (params?: GetNewsParams): Promise<GetNewsResponse> => {
-	const { data } = await dtMoneyApi.get<GetNewsResponse>('/news', { params })
+	const { data } = await newsApi.get<GetNewsResponse>('/news', { params })
 	return data
 }
 
 export const getArticleDetails = async (uuid: string): Promise<ArticleDetail> => {
-	const { data } = await dtMoneyApi.get<{ data: ArticleDetail }>('/details', {
+	const { data } = await newsApi.get<{ data: ArticleDetail }>('/details', {
 		params: { uuid },
 	})
 	return data.data

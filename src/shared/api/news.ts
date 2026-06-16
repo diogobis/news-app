@@ -10,13 +10,13 @@ const baseURL = Platform.select({
 	windows: "http://localhost:3001",
 });
 
-export const dtMoneyApi = axios.create({
+export const newsApi = axios.create({
 	baseURL,
 });
 
-addTokenToRequest(dtMoneyApi);
+addTokenToRequest(newsApi);
 
-dtMoneyApi.interceptors.response.use(
+newsApi.interceptors.response.use(
 	(response) => response,
 	(error) => {
 		if (error.response && error.response.data) {

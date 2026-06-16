@@ -1,4 +1,4 @@
-import { dtMoneyApi } from '@/shared/api/dtmoney'
+import { newsApi } from '@/shared/api/news'
 import { ArticleDetail } from '@/shared/interfaces/news/article-detail.interface'
 import { FavoriteItem } from '@/shared/interfaces/news/favorite.interface'
 import { ReadLaterItem } from '@/shared/interfaces/news/read-later.interface'
@@ -11,16 +11,16 @@ interface FavoritesFilterParams {
 }
 
 export const getFavorites = async (params?: FavoritesFilterParams): Promise<FavoriteItem[]> => {
-	const { data } = await dtMoneyApi.get<{ data: FavoriteItem[] }>('/me/favorites', { params })
+	const { data } = await newsApi.get<{ data: FavoriteItem[] }>('/me/favorites', { params })
 	return data.data
 }
 
 export const saveFavorite = async (articleUuid: string): Promise<void> => {
-	await dtMoneyApi.post('/me/favorites', { articleUuid })
+	await newsApi.post('/me/favorites', { articleUuid })
 }
 
 export const removeFavorite = async (articleUuid: string): Promise<void> => {
-	await dtMoneyApi.delete(`/me/favorites/${articleUuid}`)
+	await newsApi.delete(`/me/favorites/${articleUuid}`)
 }
 
 interface ReadLaterFilterParams {
@@ -30,30 +30,30 @@ interface ReadLaterFilterParams {
 }
 
 export const getReadLater = async (params?: ReadLaterFilterParams): Promise<ReadLaterItem[]> => {
-	const { data } = await dtMoneyApi.get<{ data: ReadLaterItem[] }>('/me/read-later', { params })
+	const { data } = await newsApi.get<{ data: ReadLaterItem[] }>('/me/read-later', { params })
 	return data.data
 }
 
 export const saveReadLater = async (articleUuid: string): Promise<void> => {
-	await dtMoneyApi.post('/me/read-later', { articleUuid })
+	await newsApi.post('/me/read-later', { articleUuid })
 }
 
 export const removeReadLater = async (articleUuid: string): Promise<void> => {
-	await dtMoneyApi.delete(`/me/read-later/${articleUuid}`)
+	await newsApi.delete(`/me/read-later/${articleUuid}`)
 }
 
 // Muted Keywords
 export const getMutedKeywords = async (): Promise<MutedKeyword[]> => {
-	const { data } = await dtMoneyApi.get<{ data: MutedKeyword[] }>('/me/mutes')
+	const { data } = await newsApi.get<{ data: MutedKeyword[] }>('/me/mutes')
 	return data.data
 }
 
 export const addMutedKeyword = async (keyword: string): Promise<void> => {
-	await dtMoneyApi.post('/me/mutes', { keyword })
+	await newsApi.post('/me/mutes', { keyword })
 }
 
 export const removeMutedKeyword = async (id: number): Promise<void> => {
-	await dtMoneyApi.delete(`/me/mutes/${id}`)
+	await newsApi.delete(`/me/mutes/${id}`)
 }
 
 // User news feed (with muting applied)
@@ -77,6 +77,6 @@ interface GetNewsResponse {
 }
 
 export const getUserNews = async (params?: GetUserNewsParams): Promise<GetNewsResponse> => {
-	const { data } = await dtMoneyApi.get<GetNewsResponse>('/me/news', { params })
+	const { data } = await newsApi.get<GetNewsResponse>('/me/news', { params })
 	return data
 }

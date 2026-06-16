@@ -1,4 +1,4 @@
-import { dtMoneyApi } from "@/shared/api/dtmoney";
+import { newsApi } from "@/shared/api/news";
 
 import { FormLoginParams } from "@/screens/Login/LoginForm";
 import { FormRegisterParams } from "@/screens/Register/RegisterForm";
@@ -8,7 +8,7 @@ import { IAuthenticateResponse } from "@/shared/interfaces/authenticate-response
 export const authenticate = async (
 	userData: FormLoginParams,
 ): Promise<IAuthenticateResponse> => {
-	const { data } = await dtMoneyApi.post<{ data: IAuthenticateResponse }>(
+	const { data } = await newsApi.post<{ data: IAuthenticateResponse }>(
 		"/auth/login",
 		{
 			emailOrUsername: userData.email,
@@ -21,7 +21,7 @@ export const authenticate = async (
 export const registerUser = async (
 	userData: FormRegisterParams,
 ): Promise<IAuthenticateResponse> => {
-	const { data } = await dtMoneyApi.post<{ data: IAuthenticateResponse }>(
+	const { data } = await newsApi.post<{ data: IAuthenticateResponse }>(
 		"/auth/register",
 		{
 			email: userData.email,

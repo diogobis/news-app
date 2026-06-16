@@ -11,7 +11,7 @@ export const setLogoutListener = (listener: LogoutListener | null) => {
 
 export const addTokenToRequest = (axiosInstance: AxiosInstance) => {
 	axiosInstance.interceptors.request.use(async (config) => {
-		const userData = await AsyncStorage.getItem("dt-money-user");
+		const userData = await AsyncStorage.getItem("news-user");
 
 		if (userData) {
 			const { token } = JSON.parse(userData) as IAuthenticateResponse;

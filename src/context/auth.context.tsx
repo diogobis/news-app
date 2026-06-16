@@ -18,7 +18,7 @@ type AuthContextType = {
 	token: string | null;
 	handleAuthenticate: (params: FormLoginParams) => Promise<void>;
 	handleRegister: (params: FormRegisterParams) => Promise<void>;
-	handleLogout: () => void;
+	handleLogout: () => Promise<void>;
 	restoreUserSession: () => Promise<string | null>;
 };
 

@@ -29,15 +29,13 @@ export const Loading: FC<LoadingParams> = ({ setLoading }) => {
 	}, []);
 
 	return (
-		// <SafeAreaView className="flex-1 bg-background-primary items-center justify-center">
-			<>
-				<Image
-					source={require("@/assets/logo.png")}
-					className="h-[48px] w-[255px]"
-				/>
+		<SafeAreaView className="flex-1 bg-background-primary items-center justify-center">
+			<Image
+				source={require("@/assets/logo.png")}
+				className="h-[48px] w-[255px]"
+			/>
 
-				<ActivityIndicator color={colors.white} className="mt-20" />
-			</>
-		// </SafeAreaView>
+			<ActivityIndicator color={colors.white} className="mt-20" />
+		</SafeAreaView>
 	);
 };

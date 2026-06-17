@@ -18,7 +18,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
-      "package": "com.anonymous.dtmoneyapp"
+      "package": "com.anonymous.newsapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"

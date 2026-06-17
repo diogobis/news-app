@@ -24,7 +24,7 @@ export const CommentCard = ({ comment, currentUserId, onReply, onDelete, onEdit 
 	}, [comment.content, isEditing])
 
 	const timeAgo = useMemo(
-		() => formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: ptBR }),
+		() => formatDistanceToNow(new Date(comment.createdAt), { addSuffix: false, locale: ptBR }),
 		[comment.createdAt],
 	)
 

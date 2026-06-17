@@ -1,26 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-	ActivityIndicator,
-	FlatList,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
-} from 'react-native'
-import { MaterialIcons } from '@expo/vector-icons'
+import { Text, View } from 'react-native'
 
 import { CommentItem } from '@/shared/interfaces/news/comment.interface'
 import * as CommentsService from '@/shared/services/news/comments.service'
 import { useAuthContext } from '@/context/auth.context'
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
-import { colors } from '@/shared/colors'
-import { CommentCard } from './CommentCard'
+import { CommentList, FlattenedComment } from './CommentList'
+import { CommentInput } from './CommentInput'
 
 interface CommentsProps {
 	articleUuid: string
 }
-
-type FlattenedComment = CommentItem & { depth: number }
 
 export const Comments = ({ articleUuid }: CommentsProps) => {
 	const { user } = useAuthContext()
@@ -100,18 +90,6 @@ export const Comments = ({ articleUuid }: CommentsProps) => {
 		setContent('')
 	}
 
-	const renderComment = ({ item }: { item: FlattenedComment }) => (
-		<View style={item.depth === 1 ? { marginLeft: 24 } : undefined}>
-			<CommentCard
-				comment={item}
-				currentUserId={user?.id ?? null}
-				onReply={(id, username) => setReplyingTo({ id, username })}
-				onDelete={handleDelete}
-				onEdit={handleEdit}
-			/>
-		</View>
-	)
-
 	return (
 		<View className="mt-8 mb-4">
 			<View className="flex-row items-center mb-6">
@@ -120,63 +98,24 @@ export const Comments = ({ articleUuid }: CommentsProps) => {
 				<View className="flex-1 h-px bg-gray-800" />
 			</View>
 
-			{loading ? (
-				<ActivityIndicator color={colors['accent-brand-light']} size="large" />
-			) : (
-				<FlatList
-					data={flattened}
-					keyExtractor={(item) => `comment-${item.id}`}
-					renderItem={renderComment}
-					scrollEnabled={false}
-					ListEmptyComponent={
-						<Text className="text-gray-500 text-base text-center mb-6">
-							Nenhum comentário ainda. Seja o primeiro a comentar!
-						</Text>
-					}
-				/>
-			)}
+			<CommentList
+				flattened={flattened}
+				loading={loading}
+				currentUserId={user?.id ?? null}
+				onReply={(id, username) => setReplyingTo({ id, username })}
+				onDelete={handleDelete}
+				onEdit={handleEdit}
+			/>
 
-			{user ? (
-				<View className="mt-6">
-					{replyingTo && (
-						<View className="flex-row items-center mb-2">
-							<MaterialIcons name="reply" size={16} color={colors['accent-brand-light']} />
-							<Text className="text-accent-brand-light text-sm ml-1 flex-1">
-								Respondendo a @{replyingTo.username}
-							</Text>
-							<TouchableOpacity onPress={cancelReply}>
-								<MaterialIcons name="close" size={18} color={colors.gray[500]} />
-							</TouchableOpacity>
-						</View>
-					)}
-
-					<View className="flex-row items-end">
-						<TextInput
-							className="flex-1 bg-background-tertiary text-white text-base px-4 py-3 rounded-xl max-h-24"
-							placeholder={replyingTo ? 'Escreva sua resposta...' : 'Escreva um comentário...'}
-							placeholderTextColor={colors.gray[600]}
-							value={content}
-							onChangeText={setContent}
-							multiline
-						/>
-						<TouchableOpacity
-							className="ml-2 bg-accent-brand h-12 w-12 rounded-xl items-center justify-center"
-							onPress={handleSubmit}
-							disabled={!content.trim() || submitting}
-						>
-							{submitting ? (
-								<ActivityIndicator color={colors.white} size="small" />
-							) : (
-								<MaterialIcons name="send" size={20} color={colors.white} />
-							)}
-						</TouchableOpacity>
-					</View>
-				</View>
-			) : (
-				<Text className="text-gray-500 text-sm text-center mt-6">
-					Faça login para comentar
-				</Text>
-			)}
+			<CommentInput
+				user={user}
+				replyingTo={replyingTo}
+				content={content}
+				submitting={submitting}
+				onSubmit={handleSubmit}
+				onCancelReply={cancelReply}
+				onChangeText={setContent}
+			/>
 		</View>
 	)
 }

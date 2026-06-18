@@ -50,7 +50,7 @@ export const DrawerContent = ({ navigation, state }: DrawerContentComponentProps
 				})}
 			</DrawerContentScrollView>
 
-			<View className="px-4 pb-8 border-t border-gray-800 pt-4">
+			<View className="px-4 border-t border-gray-800 pt-4" style={{ paddingTop: insets.bottom + 32 }}>
 				<DrawerItem
 					label="Sair"
 					icon={({ size }) => <MaterialIcons name="logout" size={size} color={colors['accent-red']} />}

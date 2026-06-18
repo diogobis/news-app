@@ -12,9 +12,15 @@ import { useAuthContext } from './auth.context'
 
 type ReadLaterContextType = {
 	readLater: ReadLaterItem[]
-	fetchReadLater: (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => Promise<void>
+	searchTerm: string
+	dateFrom: string
+	dateTo: string
+	fetchReadLater: () => Promise<void>
 	handleSaveReadLater: (articleUuid: string) => Promise<void>
 	handleRemoveReadLater: (articleUuid: string) => Promise<void>
+	setSearchTerm: (term: string) => void
+	setDateFrom: (date: string) => void
+	setDateTo: (date: string) => void
 }
 
 export const ReadLaterContext = createContext({} as ReadLaterContextType)
@@ -22,12 +28,19 @@ export const ReadLaterContext = createContext({} as ReadLaterContextType)
 export const ReadLaterContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	const { user } = useAuthContext()
 	const [readLater, setReadLater] = useState<ReadLaterItem[]>([])
+	const [searchTerm, setSearchTerm] = useState('')
+	const [dateFrom, setDateFrom] = useState('')
+	const [dateTo, setDateTo] = useState('')
 
-	const fetchReadLater = useCallback(async (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => {
+	const fetchReadLater = useCallback(async () => {
 		if (!user) return
-		const items = await UserService.getReadLater(params)
+		const items = await UserService.getReadLater({
+			search: searchTerm || undefined,
+			publishedFrom: dateFrom || undefined,
+			publishedTo: dateTo || undefined,
+		})
 		setReadLater(items)
-	}, [user])
+	}, [user, searchTerm, dateFrom, dateTo])
 
 	const handleSaveReadLater = useCallback(async (articleUuid: string) => {
 		await UserService.saveReadLater(articleUuid)
@@ -43,9 +56,15 @@ export const ReadLaterContextProvider: FC<PropsWithChildren> = ({ children }) =>
 		<ReadLaterContext.Provider
 			value={{
 				readLater,
+				searchTerm,
+				dateFrom,
+				dateTo,
 				fetchReadLater,
 				handleSaveReadLater,
 				handleRemoveReadLater,
+				setSearchTerm,
+				setDateFrom,
+				setDateTo,
 			}}
 		>
 			{children}

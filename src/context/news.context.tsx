@@ -33,9 +33,9 @@ type NewsContextType = {
 	loadings: Loadings
 	dateFrom: string
 	dateTo: string
-	fetchNews: (params?: { page?: number; category?: string; search?: string; publishedFrom?: string; publishedTo?: string }) => Promise<void>
-	refreshNews: (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => Promise<void>
-	loadMoreNews: (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => Promise<void>
+	fetchNews: (params?: { page?: number; category?: string }) => Promise<void>
+	refreshNews: () => Promise<void>
+	loadMoreNews: () => Promise<void>
 	setSelectedCategory: (category: string | null) => void
 	setSearchTerm: (term: string) => void
 	setDateFrom: (date: string) => void
@@ -69,15 +69,12 @@ export const NewsContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		setLoadings((prev) => ({ ...prev, [key]: value }))
 	}
 
-	const fetchNews = useCallback(async (params?: { page?: number; category?: string; search?: string; publishedFrom?: string; publishedTo?: string }) => {
+	const fetchNews = useCallback(async (params?: { page?: number; category?: string }) => {
 		const page = params?.page ?? 1
 		const category = params && 'category' in params ? (params.category ?? undefined) : (selectedCategory ?? undefined)
-		const search = params && 'search' in params ? (params.search ?? undefined) : (searchTerm || undefined)
-		const publishedFrom = params && 'publishedFrom' in params ? (params.publishedFrom ?? undefined) : (dateFrom || undefined)
-		const publishedTo = params && 'publishedTo' in params ? (params.publishedTo ?? undefined) : (dateTo || undefined)
 
 		const service = user ? UserService.getUserNews : NewsService.getNews
-		const response = await service({ page, limit: 15, category, search, publishedFrom, publishedTo })
+		const response = await service({ page, limit: 15, category, search: searchTerm || undefined, publishedFrom: dateFrom || undefined, publishedTo: dateTo || undefined })
 
 		if (page === 1) {
 			setArticles(response.data as Article[])
@@ -93,13 +90,9 @@ export const NewsContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		})
 	}, [selectedCategory, searchTerm, dateFrom, dateTo, user])
 
-	const refreshNews = useCallback(async (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => {
-		const category = selectedCategory ?? undefined
-		const search = params && 'search' in params ? (params.search ?? undefined) : (searchTerm || undefined)
-		const publishedFrom = params && 'publishedFrom' in params ? (params.publishedFrom ?? undefined) : (dateFrom || undefined)
-		const publishedTo = params && 'publishedTo' in params ? (params.publishedTo ?? undefined) : (dateTo || undefined)
+	const refreshNews = useCallback(async () => {
 		const service = user ? UserService.getUserNews : NewsService.getNews
-		const response = await service({ page: 1, limit: 15, category, search, publishedFrom, publishedTo })
+		const response = await service({ page: 1, limit: 15, category: selectedCategory ?? undefined, search: searchTerm || undefined, publishedFrom: dateFrom || undefined, publishedTo: dateTo || undefined })
 
 		setArticles(response.data as Article[])
 		setPagination({
@@ -110,16 +103,12 @@ export const NewsContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		})
 	}, [selectedCategory, searchTerm, dateFrom, dateTo, user])
 
-	const loadMoreNews = useCallback(async (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => {
+	const loadMoreNews = useCallback(async () => {
 		if (loadMoreLockRef.current || pagination.page >= pagination.totalPages) return
 		loadMoreLockRef.current = true
 
-		const category = selectedCategory ?? undefined
-		const search = params && 'search' in params ? (params.search ?? undefined) : (searchTerm || undefined)
-		const publishedFrom = params && 'publishedFrom' in params ? (params.publishedFrom ?? undefined) : (dateFrom || undefined)
-		const publishedTo = params && 'publishedTo' in params ? (params.publishedTo ?? undefined) : (dateTo || undefined)
 		const service = user ? UserService.getUserNews : NewsService.getNews
-		const response = await service({ page: pagination.page + 1, limit: 15, category, search, publishedFrom, publishedTo })
+		const response = await service({ page: pagination.page + 1, limit: 15, category: selectedCategory ?? undefined, search: searchTerm || undefined, publishedFrom: dateFrom || undefined, publishedTo: dateTo || undefined })
 
 		setArticles((prev) => [...prev, ...(response.data as Article[])])
 		setPagination((prev) => ({

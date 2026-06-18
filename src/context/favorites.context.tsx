@@ -12,8 +12,14 @@ import { useAuthContext } from './auth.context'
 
 type FavoritesContextType = {
 	favorites: FavoriteItem[]
-	fetchFavorites: (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => Promise<void>
+	searchTerm: string
+	dateFrom: string
+	dateTo: string
+	fetchFavorites: () => Promise<void>
 	handleToggleFavorite: (articleUuid: string) => Promise<void>
+	setSearchTerm: (term: string) => void
+	setDateFrom: (date: string) => void
+	setDateTo: (date: string) => void
 }
 
 export const FavoritesContext = createContext({} as FavoritesContextType)
@@ -21,12 +27,19 @@ export const FavoritesContext = createContext({} as FavoritesContextType)
 export const FavoritesContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	const { user } = useAuthContext()
 	const [favorites, setFavorites] = useState<FavoriteItem[]>([])
+	const [searchTerm, setSearchTerm] = useState('')
+	const [dateFrom, setDateFrom] = useState('')
+	const [dateTo, setDateTo] = useState('')
 
-	const fetchFavorites = useCallback(async (params?: { search?: string; publishedFrom?: string; publishedTo?: string }) => {
+	const fetchFavorites = useCallback(async () => {
 		if (!user) return
-		const items = await UserService.getFavorites(params)
+		const items = await UserService.getFavorites({
+			search: searchTerm || undefined,
+			publishedFrom: dateFrom || undefined,
+			publishedTo: dateTo || undefined,
+		})
 		setFavorites(items)
-	}, [user])
+	}, [user, searchTerm, dateFrom, dateTo])
 
 	const handleToggleFavorite = useCallback(async (articleUuid: string) => {
 		const isFavorited = favorites.some((f) => f.articleUuid === articleUuid)
@@ -44,8 +57,14 @@ export const FavoritesContextProvider: FC<PropsWithChildren> = ({ children }) =>
 		<FavoritesContext.Provider
 			value={{
 				favorites,
+				searchTerm,
+				dateFrom,
+				dateTo,
 				fetchFavorites,
 				handleToggleFavorite,
+				setSearchTerm,
+				setDateFrom,
+				setDateTo,
 			}}
 		>
 			{children}

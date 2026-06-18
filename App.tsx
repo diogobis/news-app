@@ -2,10 +2,10 @@ import "./src/styles/global.css";
 
 import { SnackBar } from "@/components/SnackBar";
 import { AuthContextProvider } from "@/context/auth.context";
-import { BottomSheetProvider } from "@/context/bottom-sheet.context";
 import { SnackbarContextProvider } from "@/context/snackbar.context";
 import { NewsContextProvider } from "@/context/news.context";
-import { UserFeaturesContextProvider } from "@/context/user-features.context";
+import { UserFeaturesContextProvider } from "@/context/user-features.provider";
+import { CommentsContextProvider } from "@/context/comments.context";
 import NavigationRoutes from "@/routes";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -16,11 +16,11 @@ export default function App() {
 				<AuthContextProvider>
 					<NewsContextProvider>
 						<UserFeaturesContextProvider>
-							<BottomSheetProvider>
+							<CommentsContextProvider>
 								<NavigationRoutes />
 
 								<SnackBar />
-							</BottomSheetProvider>
+							</CommentsContextProvider>
 						</UserFeaturesContextProvider>
 					</NewsContextProvider>
 				</AuthContextProvider>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 
@@ -85,18 +85,24 @@ export const ArticleDetail = () => {
 
 	return (
 		<SafeAreaView className="flex-1 bg-background-primary">
-			<ArticleDetailHeader publisher={article.publisher} onGoBack={() => navigation.goBack()} />
+			<KeyboardAvoidingView
+				behavior="padding"
+				style={{ flex: 1 }}
+			>
+			
+				<ArticleDetailHeader publisher={article.publisher} onGoBack={() => navigation.goBack()} />
 
-			<ArticleContent article={article} />
+				<ArticleContent article={article} />
 
-			<ArticleActions
-				user={user}
-				isFavorited={isFavorited}
-				isSaved={isSaved}
-				onFavoritePress={handleFavoritePress}
-				onSaveLaterPress={handleSaveLaterPress}
-				onAuthRequired={handleAuthRequired}
-			/>
+				<ArticleActions
+					user={user}
+					isFavorited={isFavorited}
+					isSaved={isSaved}
+					onFavoritePress={handleFavoritePress}
+					onSaveLaterPress={handleSaveLaterPress}
+					onAuthRequired={handleAuthRequired}
+				/>
+			</KeyboardAvoidingView>
 		</SafeAreaView>
 	)
 }

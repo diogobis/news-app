@@ -22,7 +22,7 @@ export const ArticleContent = ({ article }: ArticleContentProps) => {
 
 	return (
 		<View style={styles.container}>
-			<ScrollView className="flex-1 px-4">
+			<ScrollView className="flex-1 px-4" keyboardShouldPersistTaps="handled">
 				<Text className="text-white text-2xl font-bold mb-4">{article.title}</Text>
 
 				<View className="flex-row items-center mb-4">

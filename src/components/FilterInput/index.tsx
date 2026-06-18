@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SearchInput } from './SearchInput'
 import { DateFilter } from './DateFilter'
 import { View } from 'react-native'
@@ -16,17 +16,19 @@ export const FilterInput = ({ onFilterChange, searchPlaceholder = 'Buscar...' }:
 	const [searchText, setSearchText] = useState('')
 	const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined)
 	const [dateTo, setDateTo] = useState<Date | undefined>(undefined)
+	const onFilterChangeRef = useRef(onFilterChange)
+	onFilterChangeRef.current = onFilterChange
 
 	useEffect(() => {
 		const handler = setTimeout(() => {
-			onFilterChange({
+			onFilterChangeRef.current({
 				search: searchText || undefined,
 				publishedFrom: dateFrom ? dateFrom.toISOString().slice(0, 10) : undefined,
 				publishedTo: dateTo ? dateTo.toISOString().slice(0, 10) : undefined,
 			})
 		}, 500)
 		return () => clearTimeout(handler)
-	}, [searchText, dateFrom, dateTo, onFilterChange])
+	}, [searchText, dateFrom, dateTo])
 
 	return (
 		<View className="px-6">

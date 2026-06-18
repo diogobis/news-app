@@ -54,7 +54,7 @@ export const NewsFeed = () => {
 	}
 
 	useEffect(() => {
-		;(async () => {
+		(async () => {
 			try {
 				handleLoadings({ key: 'initial', value: true })
 				await fetchNews()

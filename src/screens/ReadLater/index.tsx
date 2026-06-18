@@ -27,7 +27,7 @@ export const ReadLater = () => {
 	const navigation = useNavigation<DrawerNavigationProp<DrawerParamsList>>()
 
 	useEffect(() => {
-		;(async () => {
+		(async () => {
 			try {
 				await fetchReadLater()
 			} catch (error) {

@@ -6,7 +6,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 import { ArticleDetail as ArticleDetailType } from '@/shared/interfaces/news/article-detail.interface'
 import * as NewsService from '@/shared/services/news/news.service'
 import { useAuthContext } from '@/context/auth.context'
-import { useUserFeaturesContext } from '@/context/user-features.context'
+import { useFavoritesContext, useReadLaterContext } from '@/context/user-features.provider'
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
 import { useSnackbarContext } from '@/context/snackbar.context'
 import { colors } from '@/shared/colors'
@@ -23,13 +23,8 @@ export const ArticleDetail = () => {
 	const navigation = useNavigation()
 	const { uuid } = route.params
 	const { user } = useAuthContext()
-	const {
-		favorites,
-		readLater,
-		handleToggleFavorite,
-		handleSaveReadLater,
-		handleRemoveReadLater,
-	} = useUserFeaturesContext()
+	const { favorites, handleToggleFavorite } = useFavoritesContext()
+	const { readLater, handleSaveReadLater, handleRemoveReadLater } = useReadLaterContext()
 	const { errorHandler } = useErrorHandler()
 	const { notify } = useSnackbarContext()
 

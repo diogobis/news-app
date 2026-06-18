@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native'
 import { DrawerNavigationProp } from '@react-navigation/drawer'
 
 import { DrawerParamsList } from '@/shared/interfaces/navigation.types'
-import { useUserFeaturesContext } from '@/context/user-features.context'
+import { useReadLaterContext } from '@/context/user-features.provider'
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
 import { SearchBar } from '@/components/SearchBar'
 import { DateFilterBar } from '@/components/DateFilterBar'
@@ -13,7 +13,7 @@ import { DrawerScreenHeader } from '@/components/DrawerScreenHeader'
 import { ReadLaterCard } from './ReadLaterCard'
 
 export const ReadLater = () => {
-	const { readLater, fetchReadLater, handleRemoveReadLater } = useUserFeaturesContext()
+	const { readLater, fetchReadLater, handleRemoveReadLater } = useReadLaterContext()
 	const { errorHandler } = useErrorHandler()
 	const navigation = useNavigation<DrawerNavigationProp<DrawerParamsList>>()
 	const searchRef = useRef('')

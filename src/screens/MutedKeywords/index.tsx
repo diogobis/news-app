@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import {
 	ActivityIndicator,
 	FlatList,
@@ -7,21 +7,32 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native'
+import { useForm, Controller } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
 
-import { useUserFeaturesContext } from '@/context/user-features.context'
+import { useMutedKeywordsContext } from '@/context/user-features.provider'
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
 import { DrawerScreenHeader } from '@/components/DrawerScreenHeader'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { colors } from '@/shared/colors'
+import { schema } from './schema'
 
 export const MutedKeywords = () => {
 	const { mutedKeywords, fetchMutedKeywords, handleAddMutedKeyword, handleRemoveMutedKeyword } =
-		useUserFeaturesContext()
+		useMutedKeywordsContext()
 	const { errorHandler } = useErrorHandler()
 
-	const [keyword, setKeyword] = useState('')
-	const [adding, setAdding] = useState(false)
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { isSubmitting, errors },
+	} = useForm({
+		defaultValues: { keyword: '' },
+		resolver: yupResolver(schema),
+	})
 
 	useEffect(() => {
 		const load = async () => {
@@ -34,43 +45,47 @@ export const MutedKeywords = () => {
 		load()
 	}, [])
 
-	const handleAdd = async () => {
-		if (!keyword.trim()) return
+	const handleAdd = handleSubmit(async (data) => {
 		try {
-			setAdding(true)
-			await handleAddMutedKeyword(keyword.trim())
-			setKeyword('')
+			await handleAddMutedKeyword(data.keyword.trim())
+			reset()
 		} catch (error) {
 			errorHandler(error, 'Falha ao silenciar palavra')
-		} finally {
-			setAdding(false)
 		}
-	}
+	})
 
 	return (
 		<SafeAreaView className="flex-1 bg-background-primary">
 			<DrawerScreenHeader title="Palavras silenciadas" />
 
-			<View className="flex-row items-center mx-6 mb-6">
-				<TextInput
-					className="flex-1 h-[50px] bg-background-secondary text-white text-base px-4 rounded-xl"
-					placeholder="Adicionar palavra..."
-					placeholderTextColor={colors.gray[600]}
-					value={keyword}
-					onChangeText={setKeyword}
-					onSubmitEditing={handleAdd}
-				/>
-				<TouchableOpacity
-					className="ml-2 bg-accent-brand h-[50px] w-[50px] rounded-xl items-center justify-center"
-					onPress={handleAdd}
-					disabled={adding}
-				>
-					{adding ? (
-						<ActivityIndicator color={colors.white} />
-					) : (
-						<MaterialIcons name="add" size={24} color={colors.white} />
-					)}
-				</TouchableOpacity>
+			<View className="mx-6 mb-1">
+				<View className="flex-row items-center mb-1">
+					<Controller
+						control={control}
+						name="keyword"
+						render={({ field: { onChange, value } }) => (
+							<TextInput
+								className="flex-1 h-[50px] bg-background-secondary text-white text-base px-4 rounded-xl"
+								placeholder="Adicionar palavra..."
+								placeholderTextColor={colors.gray[600]}
+								value={value}
+								onChangeText={onChange}
+							/>
+						)}
+					/>
+					<TouchableOpacity
+						className="ml-2 bg-accent-brand h-[50px] w-[50px] rounded-xl items-center justify-center"
+						onPress={handleAdd}
+						disabled={isSubmitting}
+					>
+						{isSubmitting ? (
+							<ActivityIndicator color={colors.white} />
+						) : (
+							<MaterialIcons name="add" size={24} color={colors.white} />
+						)}
+					</TouchableOpacity>
+				</View>
+				{errors.keyword && <ErrorMessage>{errors.keyword.message}</ErrorMessage>}
 			</View>
 
 			<View className="flex-1 min-h-0">

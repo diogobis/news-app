@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { useForm, Controller } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { MaterialIcons } from '@expo/vector-icons'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { CommentItem } from '@/shared/interfaces/news/comment.interface'
 import { colors } from '@/shared/colors'
+import { ErrorMessage } from '@/components/ErrorMessage'
+import { schema } from './schema'
 
 interface CommentCardProps {
 	comment: CommentItem
@@ -16,12 +20,24 @@ interface CommentCardProps {
 
 export const CommentCard = ({ comment, currentUserId, onReply, onDelete, onEdit }: CommentCardProps) => {
 	const [isEditing, setIsEditing] = useState(false)
-	const [editContent, setEditContent] = useState(comment.content)
 	const [menuOpen, setMenuOpen] = useState(false)
 
+	const {
+		control,
+		handleSubmit: formSubmit,
+		reset,
+		setValue,
+		formState: { errors },
+	} = useForm({
+		defaultValues: { editContent: comment.content },
+		resolver: yupResolver(schema),
+	})
+
 	useEffect(() => {
-		if (!isEditing) setEditContent(comment.content)
-	}, [comment.content, isEditing])
+		if (!isEditing) {
+			setValue('editContent', comment.content)
+		}
+	}, [comment.content, isEditing, setValue])
 
 	const timeAgo = useMemo(
 		() => formatDistanceToNow(new Date(comment.createdAt), { addSuffix: false, locale: ptBR }),
@@ -30,17 +46,17 @@ export const CommentCard = ({ comment, currentUserId, onReply, onDelete, onEdit 
 
 	const isOwner = currentUserId === comment.userId
 
-	const handleSaveEdit = async () => {
-		if (!editContent.trim() || editContent === comment.content) {
+	const handleSaveEdit = formSubmit(async (data) => {
+		if (data.editContent.trim() === comment.content) {
 			setIsEditing(false)
 			return
 		}
-		await onEdit(comment.id, editContent.trim())
+		await onEdit(comment.id, data.editContent.trim())
 		setIsEditing(false)
-	}
+	})
 
 	const handleCancelEdit = () => {
-		setEditContent(comment.content)
+		reset({ editContent: comment.content })
 		setIsEditing(false)
 	}
 
@@ -57,13 +73,20 @@ export const CommentCard = ({ comment, currentUserId, onReply, onDelete, onEdit 
 					<Text className="text-gray-600 text-xs">{timeAgo}</Text>
 				</View>
 
-				<TextInput
-					className="bg-background-primary text-white text-base px-3 py-2 rounded-xl mb-3 max-h-24"
-					value={editContent}
-					onChangeText={setEditContent}
-					multiline
-					autoFocus
+				<Controller
+					control={control}
+					name="editContent"
+					render={({ field: { onChange, value } }) => (
+						<TextInput
+							className="bg-background-primary text-white text-base px-3 py-2 rounded-xl mb-3 max-h-24"
+							value={value}
+							onChangeText={onChange}
+							multiline
+							autoFocus
+						/>
+					)}
 				/>
+				{errors.editContent && <ErrorMessage>{errors.editContent.message}</ErrorMessage>}
 
 				<View className="flex-row items-center">
 					<TouchableOpacity className="flex-row items-center mr-4" onPress={handleSaveEdit}>
@@ -118,7 +141,7 @@ export const CommentCard = ({ comment, currentUserId, onReply, onDelete, onEdit 
 								<View className="bg-background-tertiary rounded-xl overflow-hidden w-48">
 									<TouchableOpacity
 										className="flex-row items-center px-4 py-3"
-										onPress={() => { setMenuOpen(false); setIsEditing(true); setEditContent(comment.content) }}
+										onPress={() => { setMenuOpen(false); setIsEditing(true); setValue('editContent', comment.content) }}
 									>
 										<MaterialIcons name="edit" size={20} color={colors.gray[400]} />
 										<Text className="text-gray-400 text-base ml-3">Editar</Text>

@@ -48,7 +48,7 @@ export const ReadLater = () => {
 		<SafeAreaView className="flex-1 bg-background-primary">
 			<DrawerScreenHeader title="Ler depois" />
 
-			<View className="px-6 pb-2">
+			<View className="pb-2">
 				<FilterInput
 					searchPlaceholder="Buscar na lista..."
 					onFilterChange={({ search, publishedFrom, publishedTo }) => {

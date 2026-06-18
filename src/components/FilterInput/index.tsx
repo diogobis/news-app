@@ -29,7 +29,7 @@ export const FilterInput = ({ onFilterChange, searchPlaceholder = 'Buscar...' }:
 	}, [searchText, dateFrom, dateTo, onFilterChange])
 
 	return (
-		<View>
+		<View className="px-6">
 			<SearchInput value={searchText} onChange={setSearchText} placeholder={searchPlaceholder} />
 			<DateFilter
 				dateFrom={dateFrom}

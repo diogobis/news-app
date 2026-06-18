@@ -13,7 +13,7 @@ export const DateFilter = ({ dateFrom, dateTo, onDateFromChange, onDateToChange 
 	const today = useMemo(() => new Date(), [])
 
 	return (
-		<View className="flex-row px-6 p-0 m-0 pb-3 gap-2 mt-2 justify-between">
+		<View className="flex-row pb-3 gap-2 mt-2">
 			<DatePicker
 				value={dateFrom}
 				onChange={onDateFromChange}

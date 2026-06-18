@@ -27,7 +27,7 @@ export const Favorites = () => {
 	const navigation = useNavigation<DrawerNavigationProp<DrawerParamsList>>()
 
 	useEffect(() => {
-		;(async () => {
+		(async () => {
 			try {
 				await fetchFavorites()
 			} catch (error) {
@@ -48,7 +48,7 @@ export const Favorites = () => {
 		<SafeAreaView className="flex-1 bg-background-primary">
 			<DrawerScreenHeader title="Favoritos" />
 
-			<View className="px-6 pb-2">
+			<View className="pb-2">
 				<FilterInput
 					searchPlaceholder="Buscar favoritos..."
 					onFilterChange={({ search, publishedFrom, publishedTo }) => {

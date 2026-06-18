@@ -84,7 +84,7 @@ export const NewsFeed = () => {
 			<View className="self-start">
 				<CategoryChips />
 			</View>
-			<View className="px-6 pt-2 pb-2">
+			<View className="pt-2 pb-2">
 				<FilterInput
 					searchPlaceholder="Buscar notícias..."
 					onFilterChange={({ search, publishedFrom, publishedTo }) => {

@@ -16,10 +16,13 @@ export const FilterInput = ({ onFilterChange, searchPlaceholder = 'Buscar...' }:
 	const [searchText, setSearchText] = useState('')
 	const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined)
 	const [dateTo, setDateTo] = useState<Date | undefined>(undefined)
+	// Evitar que o useEffect dependa diretamente de onFilterChange
+	// que é uma função do contexto e pode causar re-renderizações desnecessárias
 	const onFilterChangeRef = useRef(onFilterChange)
 	onFilterChangeRef.current = onFilterChange
 
 	useEffect(() => {
+		// Debounce na pesquisa de noticias
 		const handler = setTimeout(() => {
 			onFilterChangeRef.current({
 				search: searchText || undefined,

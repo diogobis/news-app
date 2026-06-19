@@ -1,5 +1,6 @@
 import { useNewsContext } from '@/context/news.context'
 import clsx from 'clsx'
+import { useEffect, useRef } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native'
 import { CategoryTag } from '@/components/CategoryTag'
 
@@ -17,16 +18,36 @@ const CATEGORIES = [
 
 export const CategoryChips = () => {
 	const { selectedCategory, setSelectedCategory, fetchNews, handleLoadings } = useNewsContext()
+	const hasMounted = useRef(false)
+	const fetchNewsRef = useRef(fetchNews)
+	const handleLoadingsRef = useRef(handleLoadings)
 
-	const handleSelectCategory = async (category: string | null) => {
-		try {
-			handleLoadings({ key: 'initial', value: true })
-			setSelectedCategory(category)
-			await fetchNews({ page: 1, category: category ?? undefined })
-		} finally {
-			handleLoadings({ key: 'initial', value: false })
-		}
+	const handleSelectCategory = (category: string | null) => {
+		setSelectedCategory(category)
 	}
+
+	useEffect(() => {
+		fetchNewsRef.current = fetchNews
+		handleLoadingsRef.current = handleLoadings
+	}, [fetchNews, handleLoadings])
+
+	useEffect(() => {
+		// Evita duplicar a busca inicial feita pela tela.
+		if (!hasMounted.current) {
+			hasMounted.current = true
+			return
+		}
+
+		// Atualiza noticias toda vez que selectedCategory mudar
+		(async () => {
+			try {
+				handleLoadingsRef.current({ key: 'initial', value: true })
+				await fetchNewsRef.current({ page: 1 })
+			} finally {
+				handleLoadingsRef.current({ key: 'initial', value: false })
+			}
+		})()
+	}, [selectedCategory])
 
 	return (
 		<ScrollView

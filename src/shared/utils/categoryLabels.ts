@@ -10,10 +10,6 @@ export const CATEGORIES: Record<string, { label: string; color: string }> = {
 	sports:    { label: 'Esportes',   color: '#E91E63' },
 }
 
-export const CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
-	Object.entries(CATEGORIES).map(([slug, { label }]) => [slug, label]),
-)
-
 export const categoryLabel = (slug: string): string =>
 	CATEGORIES[slug]?.label ?? slug
 

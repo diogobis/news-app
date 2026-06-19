@@ -69,6 +69,8 @@ export const NewsFeed = () => {
 	const hasFocused = useRef(false)
 
 	useEffect(() => {
+		/* Ignora o primeiro foco, que acontece na montagem do componente.
+		Só refaz a busca nas próximas vezes que o usuário voltar para a tela. */
 		const unsubscribe = navigation.addListener('focus', () => {
 			if (hasFocused.current) {
 				refreshNews().catch(() => {})

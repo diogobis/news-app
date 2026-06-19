@@ -22,7 +22,7 @@ export const CategoryChips = () => {
 		try {
 			handleLoadings({ key: 'initial', value: true })
 			setSelectedCategory(category)
-			await fetchNews({ page: 1, category: category ?? undefined })
+			await fetchNews({ page: 1 })
 		} finally {
 			handleLoadings({ key: 'initial', value: false })
 		}

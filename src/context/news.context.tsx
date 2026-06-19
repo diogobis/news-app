@@ -49,7 +49,8 @@ export const NewsContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	const { user } = useAuthContext()
 	const loadMoreLockRef = useRef(false)
 	const [articles, setArticles] = useState<Article[]>([])
-	const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+	const selectedCategoryRef = useRef<string | null>(null);
+	const [selectedCategory, setSelectedCategoryState] = useState<string | null>(null)
 	const [searchTerm, setSearchTerm] = useState('')
 	const [dateFrom, setDateFrom] = useState('')
 	const [dateTo, setDateTo] = useState('')
@@ -69,9 +70,14 @@ export const NewsContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		setLoadings((prev) => ({ ...prev, [key]: value }))
 	}
 
-	const fetchNews = useCallback(async (params?: { page?: number; category?: string }) => {
+	const setSelectedCategory = useCallback((category: string | null) => {
+		selectedCategoryRef.current = category  // Síncrono, disponível imediatamente nos fetchNews
+		setSelectedCategoryState(category)      // Assíncrono, re-renderiza os componentes
+	}, [])
+
+	const fetchNews = useCallback(async (params?: { page?: number }) => {
 		const page = params?.page ?? 1
-		const category = params && 'category' in params ? (params.category ?? undefined) : (selectedCategory ?? undefined)
+		const category = selectedCategoryRef.current ?? undefined;
 
 		const service = user ? UserService.getUserNews : NewsService.getNews
 		const response = await service({ page, limit: 15, category, search: searchTerm || undefined, publishedFrom: dateFrom || undefined, publishedTo: dateTo || undefined })

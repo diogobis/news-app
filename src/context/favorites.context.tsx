@@ -26,11 +26,14 @@ export const FavoritesContext = createContext({} as FavoritesContextType)
 
 export const FavoritesContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	const { user } = useAuthContext()
+	// Lista local de favoritos: evita consultar o backend toda vez que a UI precisa saber se uma noticia esta favoritada.
 	const [favorites, setFavorites] = useState<FavoriteItem[]>([])
+	// Filtros usados na tela "Favoritos".
 	const [searchTerm, setSearchTerm] = useState('')
 	const [dateFrom, setDateFrom] = useState('')
 	const [dateTo, setDateTo] = useState('')
 
+	// Busca no backend os favoritos do usuario.
 	const fetchFavorites = useCallback(async () => {
 		if (!user) return
 		const items = await UserService.getFavorites({
@@ -41,6 +44,7 @@ export const FavoritesContextProvider: FC<PropsWithChildren> = ({ children }) =>
 		setFavorites(items)
 	}, [user, searchTerm, dateFrom, dateTo])
 
+	// Alterna o favorito: se ja existe remove, se nao existe adiciona.
 	const handleToggleFavorite = useCallback(async (articleUuid: string) => {
 		const isFavorited = favorites.some((f) => f.articleUuid === articleUuid)
 

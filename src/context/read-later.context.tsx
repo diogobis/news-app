@@ -27,11 +27,14 @@ export const ReadLaterContext = createContext({} as ReadLaterContextType)
 
 export const ReadLaterContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	const { user } = useAuthContext()
+	// Lista local de leitura: evita consultar o backend toda vez que a UI precisa saber se uma noticia esta salva.
 	const [readLater, setReadLater] = useState<ReadLaterItem[]>([])
+	// Filtros usados na tela "Ler depois".
 	const [searchTerm, setSearchTerm] = useState('')
 	const [dateFrom, setDateFrom] = useState('')
 	const [dateTo, setDateTo] = useState('')
 
+	// Busca no backend os artigos salvos do usuario.
 	const fetchReadLater = useCallback(async () => {
 		if (!user) return
 		const items = await UserService.getReadLater({
@@ -42,11 +45,13 @@ export const ReadLaterContextProvider: FC<PropsWithChildren> = ({ children }) =>
 		setReadLater(items)
 	}, [user, searchTerm, dateFrom, dateTo])
 
+	// Salva um artigo e atualiza a lista.
 	const handleSaveReadLater = useCallback(async (articleUuid: string) => {
 		await UserService.saveReadLater(articleUuid)
 		await fetchReadLater()
 	}, [fetchReadLater])
 
+	// Remove um artigo e tira ele da lista local.
 	const handleRemoveReadLater = useCallback(async (articleUuid: string) => {
 		await UserService.removeReadLater(articleUuid)
 		setReadLater((prev) => prev.filter((r) => r.articleUuid !== articleUuid))
